@@ -44,7 +44,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
         
-        // --- Icon 解構 (確保 Pin 和 Heart 都在這裡) ---
+        // --- 1. Icon 修正：確保 Pin 和 Heart 都在這裡 ---
         const { 
             BookOpen, GraduationCap, Share2, Search, Filter, ArrowRight, Plus, X, 
             ChevronRight, Sparkles, School, ExternalLink, BookOpenCheck, AlertCircle, 
@@ -154,7 +154,8 @@
             </div>
         );
 
-        // Social Media Icons Component (修正 Line Logo)
+        // Social Media Icons Component
+        // --- 2. LINE Logo 修正：使用官方綠色樣式 ---
         const SocialMediaIcons = () => (
             <div className="flex items-center justify-center gap-6 mt-8 animate-fade-in-up delay-100">
                 {/* WhatsApp */}
@@ -196,7 +197,8 @@
             </div>
         );
 
-        // ToolCard Component (重點：確認 Pin 與 Heart 按鈕存在)
+        // ToolCard Component
+        // --- 3. 點讚與至頂功能：加入 Pin 按鈕與 Heart 按鈕 ---
         const ToolCard = ({ tool, onToggleLike, onTogglePin }) => {
             const catStyle = getCategoryStyle(tool.categoryGroup);
             const CategoryIcon = getCategoryIcon(tool.categoryGroup);
@@ -204,7 +206,7 @@
             return (
                 <div className={`group relative bg-white border ${tool.isPinned ? 'border-[#bef264] ring-1 ring-[#bef264] shadow-[0_0_20px_rgba(190,242,100,0.15)]' : 'border-slate-100'} rounded-3xl p-7 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 flex flex-col h-full animate-fade-in`}>
                     
-                    {/* 置頂按鈕 (Pin Button) */}
+                    {/* 至頂按鈕 (Pin Button) */}
                     <button 
                         onClick={(e) => { e.stopPropagation(); onTogglePin(tool.id); }}
                         className={`absolute top-5 right-5 z-10 p-2 rounded-full transition-all ${tool.isPinned ? 'text-[#4d7c0f] bg-[#bef264]' : 'text-slate-300 hover:text-[#4d7c0f] hover:bg-[#ecfccb]'}`}
