@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edcafe Chatbot Platform</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM (Updated to 18.2.0 for stability) -->
     <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel (for JSX) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Lucide Icons (Updated to 0.294.0 which has better UMD support) -->
     <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide-react.min.js"></script>
 
     <style>
@@ -114,6 +110,12 @@
             return cat ? cat.color : "bg-slate-50 text-slate-600 border-slate-200";
         };
 
+        // 新增：獲取分類圖標的輔助函式
+        const getCategoryIcon = (categoryName) => {
+            const cat = MAJOR_CATEGORIES.find(c => c.name === categoryName);
+            return cat ? cat.icon : Sparkles;
+        };
+
         const mapSubjectToGroup = (subject) => {
             if (!subject) return "其他/不分科";
             for (const group of MAJOR_CATEGORIES) {
@@ -125,28 +127,24 @@
 
         // --- 元件 Component ---
 
-        // Logo Component (更新版：使用圖片且放大尺寸)
+        // Logo Component
         const Logo = () => (
             <div className="flex items-center gap-3 cursor-pointer select-none">
-                {/* 使用 edcafe-logo.png 並放大 */}
                 <img 
                     src="edcafe-logo.png" 
                     alt="edcafe logo" 
                     className="h-10 md:h-12 w-auto object-contain"
                     onError={(e) => {
                         e.target.style.display = 'none';
-                        // 若圖片讀取失敗，顯示備用 Leaf Icon
                         if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                     }}
                 />
-                {/* 備用 Icon (隱藏) */}
                 <div className="hidden relative w-10 h-10 items-center justify-center text-[#9fd53e]">
-                     {Leaf && <Leaf size={40} fill="currentColor" strokeWidth={0} className="drop-shadow-sm" />}
+                      {Leaf && <Leaf size={40} fill="currentColor" strokeWidth={0} className="drop-shadow-sm" />}
                 </div>
 
                 <div className="flex flex-col justify-center">
                     <div className="flex items-baseline gap-3">
-                        {/* 放大字體以符合截圖風格 */}
                         <span className="font-extrabold text-3xl md:text-4xl tracking-tight text-slate-900 font-sans">
                             edcafe
                         </span>
@@ -159,13 +157,56 @@
             </div>
         );
 
+        // Social Media Icons Component (新增社群媒體圖標元件)
+        const SocialMediaIcons = () => (
+            <div className="flex items-center justify-center gap-6 mt-8 animate-fade-in-up delay-100">
+                {/* WhatsApp */}
+                <a href="https://api.whatsapp.com/message/OOAOI3R5DAQVJ1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#25D366">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                    </svg>
+                </a>
+                {/* Line */}
+                <a href="https://line.me/R/ti/p/@470qfati?oat_content=qr" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#00B900">
+                        <path d="M12 0c-6.627 0-12 4.975-12 11.111 0 5.535 4.364 10.184 10.206 10.997.397.086.938.265 1.077.608.123.302.081.764-.038 1.413-.125.682-.662 2.738-.78 3.352-.182.953.824 1.077 1.786.565 1.479-.786 8.027-4.728 10.979-8.111 3.221-3.702 4.77-7.25 4.77-11.111 0-6.136-5.373-11.111-12-11.111zm.25 15.926h-6.75c-.413 0-.75-.337-.75-.75s.337-.75.75-.75h6c.413 0 .75-.337.75-.75s-.337-.75-.75-.75h-6c-.413 0-.75-.337-.75-.75s.337-.75.75-.75h6c.413 0 .75-.337.75-.75s-.337-.75-.75-.75h-6c-.413 0-.75-.337-.75-.75s.337-.75.75-.75h6.75c.413 0 .75.337.75.75s-.337.75-.75.75z"/>
+                        <path d="M18.25 8.676c-.413 0-.75.337-.75.75v4.5c0 .413.337.75.75.75s.75-.337.75-.75v-4.5c0-.413-.337-.75-.75-.75z"/>
+                        <path d="M21.25 8.676c-.413 0-.75.337-.75.75v4.5c0 .413.337.75.75.75s.75-.337.75-.75v-4.5c0-.413-.337-.75-.75-.75z"/>
+                    </svg>
+                </a>
+                {/* Instagram */}
+                <a href="https://www.instagram.com/edcafeai.taiwan/" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+                        <defs>
+                            <linearGradient id="ig-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style={{stopColor:"#f09433", stopOpacity:1}} />
+                                <stop offset="25%" style={{stopColor:"#e6683c", stopOpacity:1}} />
+                                <stop offset="50%" style={{stopColor:"#dc2743", stopOpacity:1}} />
+                                <stop offset="75%" style={{stopColor:"#cc2366", stopOpacity:1}} />
+                                <stop offset="100%" style={{stopColor:"#bc1888", stopOpacity:1}} />
+                            </linearGradient>
+                        </defs>
+                        <path fill="url(#ig-gradient)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.069-4.85.069-3.204 0-3.584-.012-4.849-.069-3.225-.149-4.771-1.664-4.919-4.919-.058-1.265-.069-1.644-.069-4.849 0-3.204.012-3.584.069-4.849.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                </a>
+                {/* Facebook */}
+                <a href="https://www.facebook.com/profile.php?id=61572557699731" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#1877F2">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+            </div>
+        );
+
         // ToolCard Component
         const ToolCard = ({ tool, onToggleLike, onTogglePin }) => {
             const catStyle = getCategoryStyle(tool.categoryGroup);
+            const CategoryIcon = getCategoryIcon(tool.categoryGroup);
 
             return (
                 <div className={`group relative bg-white border ${tool.isPinned ? 'border-[#bef264] ring-1 ring-[#bef264] shadow-[0_0_20px_rgba(190,242,100,0.15)]' : 'border-slate-100'} rounded-3xl p-7 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 flex flex-col h-full animate-fade-in`}>
                     
+                    {/* Pin Button (置頂按鈕) */}
                     <button 
                         onClick={(e) => { e.stopPropagation(); onTogglePin(tool.id); }}
                         className={`absolute top-5 right-5 z-10 p-2 rounded-full transition-all ${tool.isPinned ? 'text-[#4d7c0f] bg-[#bef264]' : 'text-slate-300 hover:text-[#4d7c0f] hover:bg-[#ecfccb]'}`}
@@ -182,17 +223,22 @@
                             <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                                 {Users && <Users size={14} />}
                             </div>
-                            <span>{tool.author}</span>
+                            {/* 更新：顯示「由...製作」 */}
+                            <span>由 {tool.author} 製作</span>
                         </div>
                     </div>
                     
                     <div className="flex flex-wrap gap-2 mb-4">
                         {tool.targetUser === 'student' && tool.level && (
-                            <span className="px-2.5 py-0.5 text-xs font-bold rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                            <span className="px-2.5 py-0.5 text-xs font-bold rounded-md bg-slate-100 text-slate-600 border border-slate-200 flex items-center">
+                                {/* 新增：學制圖標 */}
+                                {School && <School size={14} className="mr-1" />}
                                 {tool.level}
                             </span>
                         )}
-                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-md border ${catStyle}`}>
+                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-md border ${catStyle} flex items-center`}>
+                            {/* 新增：學科分類圖標 */}
+                            {CategoryIcon && <CategoryIcon size={14} className="mr-1" />}
                             {tool.categoryGroup}
                         </span>
                     </div>
@@ -224,6 +270,7 @@
                         <span className="text-xs text-slate-400 font-medium">
                             {tool.targetUser === 'teacher' ? '老師專用' : '學生專用'}
                         </span>
+                        {/* Like Button (點讚按鈕) */}
                         <button 
                             onClick={() => onToggleLike(tool.id)}
                             className="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-red-500 transition-colors group/like"
@@ -268,14 +315,14 @@
                 setIsSubmitting(true);
 
                 const payload = {
-                    teacherName: formData.name,           
-                    chatbotName: formData.chatbotName,    
+                    teacherName: formData.name,            
+                    chatbotName: formData.chatbotName,     
                     targetUser: targetUser === 'teacher' ? '老師使用' : '學生使用', 
                     level: targetUser === 'teacher' ? '全學制' : formData.level, 
                     subject: targetUser === 'teacher' ? '不分科' : formData.subject, 
-                    description: formData.description,    
-                    copyLink: formData.link,              
-                    email: formData.email                 
+                    description: formData.description,     
+                    copyLink: formData.link,               
+                    email: formData.email                  
                 };
 
                 try {
@@ -559,10 +606,15 @@
                 fetchSheetData();
             }, []);
 
+            // 更新排序邏輯：先置頂，再按讚數排序
             const filteredTools = useMemo(() => {
                 const sorted = [...tools].sort((a, b) => {
-                    if (a.isPinned === b.isPinned) return 0;
-                    return a.isPinned ? -1 : 1;
+                    // First priority: Pin status
+                    if (a.isPinned !== b.isPinned) {
+                        return a.isPinned ? -1 : 1;
+                    }
+                    // Second priority: Likes (descending)
+                    return b.likes - a.likes;
                 });
 
                 return sorted.filter(t => {
@@ -703,7 +755,8 @@
                         
                         {/* VIEW 1: Landing Page */}
                         {view === 'landing' && (
-                            <div className="w-full max-w-5xl animate-fade-in-up text-center flex flex-col items-center">
+                            // 更新：加大 landing page 容器寬度 (max-w-7xl)
+                            <div className="w-full max-w-7xl animate-fade-in-up text-center flex flex-col items-center">
                                 <div className="mb-20">
                                     <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-tight font-serif">
                                         AI Chatbot <span className="whitespace-nowrap">共享平台</span>
@@ -721,7 +774,8 @@
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 w-full max-w-4xl mb-12">
+                                {/* 更新：加大按鈕區域寬度 (max-w-5xl) 和間距 (gap-10) */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 px-4 w-full max-w-5xl mb-12">
                                     <button 
                                         onClick={() => handleRoleSelect('teacher')}
                                         className="group h-80 bg-[#f3e8ff] hover:bg-[#e9d5ff] rounded-[2rem] p-8 flex flex-col items-center justify-center gap-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
@@ -769,6 +823,9 @@
                                         立即購買
                                     </a>
                                 </div>
+
+                                {/* 新增：社群媒體圖標 */}
+                                <SocialMediaIcons />
                             </div>
                         )}
 
@@ -902,8 +959,9 @@
                         )}
 
                     </main>
+                    {/* 更新：Footer 文字 */}
                     <footer className="border-t border-slate-100 bg-white py-12 text-center text-slate-500 text-sm font-medium">
-                        <p className="mb-2">&copy; 2024 AI Chatbot Platform. Powered by EdCafe.</p>
+                        <p className="mb-2">&copy; 2026 AI Chatbot Platform. Powered by FutureKnowledge.</p>
                         <p>致力於打造 AI 教育永續生態圈</p>
                     </footer>
                     <SubmitModal isOpen={isSubmitOpen} onClose={() => setIsSubmitOpen(false)} />
