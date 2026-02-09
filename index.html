@@ -45,17 +45,18 @@
         const { useState, useEffect, useMemo } = React;
         
         // Ensure lucideReact is defined before destructuring
-        // Added 'Backpack' for elementary school icon
         const { 
             BookOpen, GraduationCap, Share2, Search, Filter, ArrowRight, Plus, X, 
             ChevronRight, Sparkles, School, ExternalLink, BookOpenCheck, AlertCircle, 
             Users, Palette, Globe, Calculator, Copy, Smile, Leaf, Heart, Pin, Mail, 
-            Loader2, ShoppingCart, UserPlus, Home, Backpack
+            Loader2, ShoppingCart, UserPlus, Home, Backpack, Presentation, Library
         } = window.lucideReact || {};
 
         // --- 設定 Configuration ---
         const SHEET_ID = "1dQ2CZRpp9GM-LUvZWVQiT4M2w5QJ5QaPfayY-XW0VxA";
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+        
+        // ★★★ 請確認這裡填入的是您最新部署的 Web App 網址 ★★★
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZQuswrA-SxFqFuGIYGlFGxAeqdgVx72RdGiGH7cYLVypMhF3Fq12GMHZ68P41kf2qEw/exec"; 
 
         const MAJOR_CATEGORIES = [
@@ -127,7 +128,7 @@
 
         // --- 元件 Component ---
 
-        // Logo Component (修改：移除 "edcafe" 文字，保留圖片和 "Future Knowledge")
+        // Logo Component (更新：移除右側文字，保留 Logo 和 Future Knowledge)
         const Logo = () => (
             <div className="flex items-center gap-3 cursor-pointer select-none">
                 <img 
@@ -154,7 +155,7 @@
             </div>
         );
 
-        // Social Media Icons Component (修改：更新 Line 圖標為正確樣式)
+        // Social Media Icons Component (更新：修正 LINE 圖標)
         const SocialMediaIcons = () => (
             <div className="flex items-center justify-center gap-6 mt-8 animate-fade-in-up delay-100">
                 {/* WhatsApp */}
@@ -163,10 +164,10 @@
                         <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.463 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
                     </svg>
                 </a>
-                {/* Line (Updated to correct official icon SVG) */}
+                {/* Line (Official Style) */}
                 <a href="https://line.me/R/ti/p/@470qfati?oat_content=qr" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#06C755">
-                        <path d="M24 10.304c0-5.688-5.386-10.304-12-10.304C5.386 0 0 4.616 0 10.304c0 5.107 4.346 9.358 10.496 10.18.408.088.965.27 1.106.62.127.308.083.787-.04 1.452-.128.698-.683 2.812-.803 3.442-.187.977.848 1.106 1.836.58 1.521-.808 8.249-4.858 11.28-8.331C23.296 14.515 24 12.482 24 10.304zm-3.852 2.64h-5.564c-.234 0-.424-.19-.424-.424V6.957c0-.234.19-.424.424-.424s.424.19.424.424v5.14h5.14c.234 0 .424.19.424.424s-.19.424-.424.424zm-2.858-5.564H12.89v4.504c0 .234-.19.424-.424.424s-.424-.19-.424-.424V7.38h-4.4c-.234 0-.424-.19-.424-.424s.19-.424.424-.424h4.4V2.028c0-.234.19-.424.424-.424s.424.19.424.424v4.504h4.4c.234 0 .424.19.424.424s-.19.424-.424.424zm-8.303 5.564H3.424c-.234 0-.424-.19-.424-.424V6.957c0-.234.19-.424.424-.424h5.564c.234 0 .424.19.424.424V12.1c0 .234-.19.424-.424.424zm.424-5.988H4.272v4.716h4.716V6.957z"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256" fill="#06C755">
+                        <path d="M226.7,117.6c0-56-49.8-101.5-111-101.5S4.7,61.6,4.7,117.6c0,50.1,42.7,92,102.3,100.1c4,0.9,9.4,2.7,10.8,6.1 c1.2,3,0.8,7.7-0.4,14.1c-1.2,6.8-6.7,27.4-7.8,33.5c-1.8,9.5,8.3,10.8,17.9,5.7c14.8-7.9,80.4-47.3,110-81.2 C227.1,179.6,226.7,159.7,226.7,117.6z M62.2,143.6H42.7V83.3h19.5v41.3h22.9v19H62.2z M107.1,143.6H87.5V83.3h19.5V143.6z M167.3,143.6h-19.5V101.4l-23.7,42.2h-13.8l-0.1-60.3h19.5v41.6l23.5-41.6h14.1V143.6z M214.3,102.3h-24.9v11.9h24.9v18.7h-24.9 v10.7h24.9v18.7h-44.4V83.3h44.4V102.3z"/>
                     </svg>
                 </a>
                 {/* Instagram */}
@@ -193,7 +194,7 @@
             </div>
         );
 
-        // ToolCard Component
+        // ToolCard Component (更新：點讚邏輯與置頂)
         const ToolCard = ({ tool, onToggleLike, onTogglePin }) => {
             const catStyle = getCategoryStyle(tool.categoryGroup);
             const CategoryIcon = getCategoryIcon(tool.categoryGroup);
@@ -262,7 +263,7 @@
                             {tool.targetUser === 'teacher' ? '老師專用' : '學生專用'}
                         </span>
                         <button 
-                            onClick={() => onToggleLike(tool.id)}
+                            onClick={() => onToggleLike(tool)}
                             className="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-red-500 transition-colors group/like"
                         >
                             {Heart && <Heart 
@@ -553,6 +554,9 @@
                             
                             const rawCategory = row[5] || '其他';
                             const categoryGroup = mapSubjectToGroup(rawCategory);
+                            // 讀取點讚數，假設在第 10 欄 (Index 9)
+                            // 如果您的 CSV 結構不同，請調整這裡的 index
+                            const likes = parseInt(row[9]) || 0;
 
                             return {
                                 id: row[0] || `auto-${index}`,
@@ -565,7 +569,7 @@
                                 description: row[6] || '無描述',
                                 copyUrl: row[7] || '',
                                 externalUrl: row[8] || '',
-                                likes: 0,
+                                likes: likes, // 使用從 Sheet 讀取到的點讚數
                                 liked: false,
                                 isPinned: false
                             };
@@ -596,11 +600,14 @@
                 fetchSheetData();
             }, []);
 
+            // 排序邏輯：先置頂，再按讚數排序
             const filteredTools = useMemo(() => {
                 const sorted = [...tools].sort((a, b) => {
+                    // First priority: Pin status
                     if (a.isPinned !== b.isPinned) {
                         return a.isPinned ? -1 : 1;
                     }
+                    // Second priority: Likes (descending)
                     return b.likes - a.likes;
                 });
 
@@ -618,13 +625,35 @@
                 });
             }, [tools, view, userRole, selectedLevel, selectedCategory]);
 
-            const handleToggleLike = (id) => {
+            // 處理點讚：同時更新前端與後端
+            const handleToggleLike = async (tool) => {
+                // 1. 樂觀 UI 更新 (立即顯示 +1)
                 setTools(prev => prev.map(t => {
-                    if (t.id === id) {
-                        return { ...t, likes: t.liked ? t.likes - 1 : t.likes + 1, liked: !t.liked };
+                    if (t.id === tool.id) {
+                        // 簡單防呆：這裡可以加上判斷是否已點讚，避免單次 Session 重複點
+                        return { ...t, likes: t.likes + 1, liked: true };
                     }
                     return t;
                 }));
+
+                // 2. 發送請求給 Google Apps Script 進行後端儲存
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        mode: "no-cors", // Google Script 跨域限制需要 no-cors
+                        body: JSON.stringify({
+                            action: "like",
+                            title: tool.title,
+                            author: tool.author
+                        }),
+                        headers: {
+                            "Content-Type": "text/plain;charset=utf-8",
+                        },
+                    });
+                    // 注意：no-cors 模式下無法讀取 response，但請求會發送
+                } catch (e) {
+                    console.error("點讚傳送失敗", e);
+                }
             };
 
             const handleTogglePin = (id) => {
@@ -766,9 +795,9 @@
                                         onClick={() => handleRoleSelect('teacher')}
                                         className="group h-80 bg-[#f3e8ff] hover:bg-[#e9d5ff] rounded-[2rem] p-8 flex flex-col items-center justify-center gap-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
                                     >
-                                        {/* Icon: GraduationCap */}
+                                        {/* Icon: Presentation (Teacher) */}
                                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-all duration-300">
-                                            {GraduationCap && <GraduationCap size={40} className="text-[#9333ea]" />}
+                                            {Presentation && <Presentation size={40} className="text-[#9333ea]" />}
                                         </div>
                                         <div className="text-center">
                                             <h2 className="text-3xl font-bold text-[#581c87] mb-3 tracking-tight font-serif">老師使用</h2>
@@ -780,7 +809,7 @@
                                         onClick={() => handleRoleSelect('student')}
                                         className="group h-80 bg-[#dcfce7] hover:bg-[#bbf7d0] rounded-[2rem] p-8 flex flex-col items-center justify-center gap-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
                                     >
-                                        {/* Icon: BookOpen */}
+                                        {/* Icon: BookOpen (Student) */}
                                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-all duration-300">
                                             {BookOpen && <BookOpen size={40} className="text-[#16a34a]" />}
                                         </div>
@@ -832,7 +861,7 @@
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {['國小', '國中', '高中'].map((level, index) => {
                                         const colors = ['bg-[#e0f2fe] hover:bg-[#bae6fd] text-[#0369a1]', 'bg-[#fef9c3] hover:bg-[#fde047] text-[#a16207]', 'bg-[#ffedd5] hover:bg-[#fdba74] text-[#c2410c]'];
-                                        // Modified: Distinct icons for levels
+                                        // Icons for levels
                                         let LevelIcon = School;
                                         if (level === '國小') LevelIcon = Backpack;
                                         if (level === '高中') LevelIcon = GraduationCap;
