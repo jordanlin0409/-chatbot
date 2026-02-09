@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edcafe Chatbot Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM (Updated to 18.2.0 for stability) -->
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (for JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons (Updated to 0.294.0 which has better UMD support) -->
+    <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide-react.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-900 selection:bg-[#cbf368] selection:text-[#1a2e05] overflow-x-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        
+        // Ensure lucideReact is defined before destructuring
+        const { 
+            BookOpen, GraduationCap, Share2, Search, Filter, ArrowRight, Plus, X, 
+            ChevronRight, Sparkles, School, ExternalLink, BookOpenCheck, AlertCircle, 
+            Users, Palette, Globe, Calculator, Copy, Smile, Leaf, Heart, Pin, Mail, 
+            Loader2, ShoppingCart, UserPlus, Home 
+        } = window.lucideReact || {};
+
+        // --- 設定 Configuration ---
+        const SHEET_ID = "1dQ2CZRpp9GM-LUvZWVQiT4M2w5QJ5QaPfayY-XW0VxA";
+        const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZQuswrA-SxFqFuGIYGlFGxAeqdgVx72RdGiGH7cYLVypMhF3Fq12GMHZ68P41kf2qEw/exec"; 
+
+        const MAJOR_CATEGORIES = [
+            { name: "語文領域", icon: Globe, subjects: ["語文", "國語", "英語", "國文", "英文", "寫作", "閱讀", "語言"], color: "bg-[#fff7ed] text-[#ea580c] border-[#ffedd5]" },
+            { name: "數理科技", icon: Calculator, subjects: ["數理", "數學", "自然", "資訊", "物理", "化學", "生物", "理化", "科技", "科學"], color: "bg-[#eff6ff] text-[#2563eb] border-[#dbeafe]" },
+            { name: "人文社會", icon: Users, subjects: ["人文", "社會", "歷史", "地理", "公民", "綜合", "輔導", "心理"], color: "bg-[#fefce8] text-[#ca8a04] border-[#fef9c3]" },
+            { name: "藝術健體", icon: Palette, subjects: ["藝術健體", "藝術健康", "藝術", "音樂", "美術", "體育", "健康", "健體", "表演"], color: "bg-[#faf5ff] text-[#9333ea] border-[#f3e8ff]" },
+            { name: "其他/不分科", icon: Sparkles, subjects: ["其他", "不分科", "班級經營", "行政", "特殊教育", "跨領域"], color: "bg-[#f8fafc] text-[#475569] border-[#e2e8f0]" }
+        ];
+
+        const LEVELS_FORM = ["國小", "國中", "高中"];
+
+        // --- 輔助函式 ---
+        const parseCSV = (text) => {
+            const rows = [];
+            let currentRow = [];
+            let currentCell = '';
+            let insideQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (insideQuotes && nextChar === '"') {
+                        currentCell += '"';
+                        i++;
+                    } else {
+                        insideQuotes = !insideQuotes;
+                    }
+                } else if (char === ',' && !insideQuotes) {
+                    currentRow.push(currentCell.trim());
+                    currentCell = '';
+                } else if ((char === '\r' || char === '\n') && !insideQuotes) {
+                    if (char === '\r' && nextChar === '\n') i++;
+                    if (currentCell || currentRow.length > 0) currentRow.push(currentCell.trim());
+                    if (currentRow.length > 0) rows.push(currentRow);
+                    currentRow = [];
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
+            }
+            if (currentCell || currentRow.length > 0) {
+                currentRow.push(currentCell.trim());
+                rows.push(currentRow);
+            }
+            return rows;
+        };
+
+        const getCategoryStyle = (categoryName) => {
+            const cat = MAJOR_CATEGORIES.find(c => c.name === categoryName) || MAJOR_CATEGORIES.find(c => c.subjects.some(s => categoryName?.includes(s)));
+            return cat ? cat.color : "bg-slate-50 text-slate-600 border-slate-200";
+        };
+
+        const mapSubjectToGroup = (subject) => {
+            if (!subject) return "其他/不分科";
+            for (const group of MAJOR_CATEGORIES) {
+                if (group.name === subject) return group.name;
+                if (group.subjects.some(s => subject.includes(s))) return group.name;
+            }
+            return "其他/不分科";
+        };
+
+        // --- 元件 Component ---
+
+        // Logo Component (更新版：使用圖片且放大尺寸)
+        const Logo = () => (
+            <div className="flex items-center gap-3 cursor-pointer select-none">
+                {/* 使用 edcafe-logo.png 並放大 */}
+                <img 
+                    src="edcafe-logo.png" 
+                    alt="edcafe logo" 
+                    className="h-10 md:h-12 w-auto object-contain"
+                    onError={(e) => {
+                        e.target.style.display = 'none';
+                        // 若圖片讀取失敗，顯示備用 Leaf Icon
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                    }}
+                />
+                {/* 備用 Icon (隱藏) */}
+                <div className="hidden relative w-10 h-10 items-center justify-center text-[#9fd53e]">
+                     {Leaf && <Leaf size={40} fill="currentColor" strokeWidth={0} className="drop-shadow-sm" />}
+                </div>
+
+                <div className="flex flex-col justify-center">
+                    <div className="flex items-baseline gap-3">
+                        {/* 放大字體以符合截圖風格 */}
+                        <span className="font-extrabold text-3xl md:text-4xl tracking-tight text-slate-900 font-sans">
+                            edcafe
+                        </span>
+                        <span className="w-px h-6 md:h-8 bg-slate-300 mx-1"></span>
+                        <span className="font-bold text-xl md:text-2xl text-slate-600 tracking-tight font-sans">
+                            Future Knowledge
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // ToolCard Component
+        const ToolCard = ({ tool, onToggleLike, onTogglePin }) => {
+            const catStyle = getCategoryStyle(tool.categoryGroup);
+
+            return (
+                <div className={`group relative bg-white border ${tool.isPinned ? 'border-[#bef264] ring-1 ring-[#bef264] shadow-[0_0_20px_rgba(190,242,100,0.15)]' : 'border-slate-100'} rounded-3xl p-7 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 flex flex-col h-full animate-fade-in`}>
+                    
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); onTogglePin(tool.id); }}
+                        className={`absolute top-5 right-5 z-10 p-2 rounded-full transition-all ${tool.isPinned ? 'text-[#4d7c0f] bg-[#bef264]' : 'text-slate-300 hover:text-[#4d7c0f] hover:bg-[#ecfccb]'}`}
+                        title={tool.isPinned ? "取消置頂" : "置頂 Chatbot"}
+                    >
+                        {Pin && <Pin size={18} fill={tool.isPinned ? "currentColor" : "none"} className={tool.isPinned ? "-rotate-45" : ""} />}
+                    </button>
+
+                    <div className="mb-3 pr-10">
+                        <h3 className="text-2xl font-bold text-slate-900 leading-tight mb-2 tracking-tight font-serif line-clamp-2">
+                            {tool.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                                {Users && <Users size={14} />}
+                            </div>
+                            <span>{tool.author}</span>
+                        </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {tool.targetUser === 'student' && tool.level && (
+                            <span className="px-2.5 py-0.5 text-xs font-bold rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                                {tool.level}
+                            </span>
+                        )}
+                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-md border ${catStyle}`}>
+                            {tool.categoryGroup}
+                        </span>
+                    </div>
+                    
+                    <p className="text-slate-600 text-[15px] mb-6 leading-relaxed flex-grow line-clamp-3">
+                        {tool.description}
+                    </p>
+
+                    <div className="flex gap-3 mt-auto mb-4">
+                        <button 
+                            onClick={() => tool.copyUrl && window.open(tool.copyUrl, '_blank')}
+                            disabled={!tool.copyUrl}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#354f38] hover:bg-[#273b2a] disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all shadow-sm"
+                        >
+                            {Copy && <Copy size={16} />}
+                            複製至帳號
+                        </button>
+                        <button 
+                            onClick={() => tool.externalUrl && window.open(tool.externalUrl, '_blank')}
+                            disabled={!tool.externalUrl}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#354f38] hover:bg-[#273b2a] disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all shadow-sm"
+                        >
+                            {ExternalLink && <ExternalLink size={16} />}
+                            新頁面開啟
+                        </button>
+                    </div>
+
+                    <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                        <span className="text-xs text-slate-400 font-medium">
+                            {tool.targetUser === 'teacher' ? '老師專用' : '學生專用'}
+                        </span>
+                        <button 
+                            onClick={() => onToggleLike(tool.id)}
+                            className="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-red-500 transition-colors group/like"
+                        >
+                            {Heart && <Heart 
+                                size={18} 
+                                className={`transition-transform group-active/like:scale-125 ${tool.liked ? 'fill-red-500 text-red-500' : ''}`} 
+                            />}
+                            <span>{tool.likes}</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Submit Modal Component
+        const SubmitModal = ({ isOpen, onClose }) => {
+            const [targetUser, setTargetUser] = useState('student');
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                chatbotName: '',
+                level: '國小',
+                subject: '語文領域',
+                link: '',
+                description: ''
+            });
+
+            const handleChange = (e) => {
+                setFormData({ ...formData, [e.target.name]: e.target.value });
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                
+                if (GOOGLE_SCRIPT_URL.includes("請在此填入")) {
+                    alert("請先在程式碼中設定 Google Apps Script 的網址！");
+                    return;
+                }
+
+                setIsSubmitting(true);
+
+                const payload = {
+                    teacherName: formData.name,           
+                    chatbotName: formData.chatbotName,    
+                    targetUser: targetUser === 'teacher' ? '老師使用' : '學生使用', 
+                    level: targetUser === 'teacher' ? '全學制' : formData.level, 
+                    subject: targetUser === 'teacher' ? '不分科' : formData.subject, 
+                    description: formData.description,    
+                    copyLink: formData.link,              
+                    email: formData.email                 
+                };
+
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify(payload),
+                        mode: "no-cors", 
+                        headers: {
+                            "Content-Type": "text/plain;charset=utf-8",
+                        },
+                    });
+
+                    alert(`🎉 提交成功！\n\n感謝 ${formData.name} 老師分享「${formData.chatbotName}」。\n我們已收到您的投稿，將盡快審核上架。`);
+                    
+                    setIsSubmitting(false);
+                    onClose();
+                    setFormData({ name: '', email: '', chatbotName: '', level: '國小', subject: '語文領域', link: '', description: '' });
+
+                } catch (error) {
+                    console.error("Error submitting form:", error);
+                    alert("提交失敗，請檢查網路連線或稍後再試。");
+                    setIsSubmitting(false);
+                }
+            };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in overflow-y-auto">
+                    <div className="bg-white border border-slate-100 rounded-[2rem] w-full max-w-2xl p-8 shadow-2xl relative my-8">
+                        <button onClick={onClose} className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors">
+                            {X && <X size={24} />}
+                        </button>
+                        
+                        <h2 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3 font-serif">
+                            <div className="p-3 rounded-2xl bg-[#cbf368] text-[#1a2e05]">
+                                {Share2 && <Share2 className="w-6 h-6" />}
+                            </div>
+                            分享你的 AI Chatbot
+                        </h2>
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-slate-700 text-sm font-bold mb-2">您的姓名/暱稱 <span className="text-red-500">*</span></label>
+                                    <input 
+                                        name="name" 
+                                        required
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        type="text" 
+                                        placeholder="例如：王老師" 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all placeholder:text-slate-400" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-slate-700 text-sm font-bold mb-2">Email (僅供聯絡用) <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <input 
+                                            name="email" 
+                                            required
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            type="email" 
+                                            placeholder="name@example.com" 
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 pl-10 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all placeholder:text-slate-400" 
+                                        />
+                                        {Mail && <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />}
+                                    </div>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-slate-700 text-sm font-bold mb-2">Chatbot 名稱 <span className="text-red-500">*</span></label>
+                                    <input 
+                                        name="chatbotName" 
+                                        required
+                                        value={formData.chatbotName}
+                                        onChange={handleChange}
+                                        type="text" 
+                                        placeholder="例如：歷史小老師 Bot" 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all placeholder:text-slate-400" 
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                <label className="block text-slate-700 text-sm font-bold mb-3">這個 Chatbot 是給誰用的？ <span className="text-red-500">*</span></label>
+                                <div className="flex gap-4">
+                                    <label className={`flex-1 cursor-pointer border-2 rounded-xl p-4 flex items-center justify-center gap-3 transition-all ${targetUser === 'teacher' ? 'border-[#cbf368] bg-white shadow-sm text-black font-bold' : 'border-transparent bg-white text-slate-500 hover:bg-slate-100'}`}>
+                                        <input 
+                                            type="radio" 
+                                            name="targetUser" 
+                                            value="teacher" 
+                                            checked={targetUser === 'teacher'} 
+                                            onChange={() => setTargetUser('teacher')}
+                                            className="hidden" 
+                                        />
+                                        {GraduationCap && <GraduationCap size={20} />}
+                                        老師使用
+                                    </label>
+                                    <label className={`flex-1 cursor-pointer border-2 rounded-xl p-4 flex items-center justify-center gap-3 transition-all ${targetUser === 'student' ? 'border-[#cbf368] bg-white shadow-sm text-black font-bold' : 'border-transparent bg-white text-slate-500 hover:bg-slate-100'}`}>
+                                        <input 
+                                            type="radio" 
+                                            name="targetUser" 
+                                            value="student" 
+                                            checked={targetUser === 'student'} 
+                                            onChange={() => setTargetUser('student')}
+                                            className="hidden" 
+                                        />
+                                        {School && <School size={20} />}
+                                        學生使用
+                                    </label>
+                                </div>
+                            </div>
+
+                            {targetUser === 'student' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+                                    <div>
+                                        <label className="block text-slate-700 text-sm font-bold mb-2">適用學制 <span className="text-red-500">*</span></label>
+                                        <div className="relative">
+                                            <select 
+                                                name="level"
+                                                value={formData.level}
+                                                onChange={handleChange}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all appearance-none cursor-pointer"
+                                            >
+                                                {LEVELS_FORM.map(l => <option key={l} value={l}>{l}</option>)}
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-700 text-sm font-bold mb-2">科目分類 <span className="text-red-500">*</span></label>
+                                        <div className="relative">
+                                            <select 
+                                                name="subject"
+                                                value={formData.subject}
+                                                onChange={handleChange}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all appearance-none cursor-pointer"
+                                            >
+                                                {MAJOR_CATEGORIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="bg-[#fffbeb] p-5 rounded-2xl border border-[#fef3c7]">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
+                                    <label className="block text-slate-900 text-sm font-bold">
+                                        Chatbot 連結 (URL) <span className="text-red-500">*</span>
+                                    </label>
+                                    <a 
+                                        href="https://www.facebook.com/share/v/17kajBsPbN/" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#3b82f6] hover:bg-[#2563eb] rounded-lg transition-colors shadow-sm"
+                                    >
+                                        {BookOpenCheck && <BookOpenCheck size={14} />}
+                                        查看複製教學 (FB)
+                                    </a>
+                                </div>
+                                
+                                <div className="flex items-start gap-3 mb-4">
+                                    {AlertCircle && <AlertCircle className="w-5 h-5 text-[#d97706] shrink-0 mt-0.5" />}
+                                    <p className="text-xs text-[#b45309] leading-relaxed font-medium">
+                                        請老師務必透過<span className="font-bold underline decoration-2 decoration-[#d97706]/50">「複製整個 Chatbot」</span>的方式分享連結，而非直接分派，以確保其他老師能完整使用並保存您的作品。
+                                    </p>
+                                </div>
+
+                                <input 
+                                    name="link"
+                                    required
+                                    value={formData.link}
+                                    onChange={handleChange}
+                                    type="url" 
+                                    placeholder="https://app.edcafe.ai/..." 
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all placeholder:text-slate-400" 
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-slate-700 text-sm font-bold mb-2">簡短描述</label>
+                                <textarea 
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows="3" 
+                                    placeholder="請簡述這個 Chatbot 能幫助學生什麼..." 
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all placeholder:text-slate-400 resize-none"
+                                ></textarea>
+                            </div>
+
+                            <div className="pt-2 flex gap-4">
+                                <button type="button" onClick={onClose} className="flex-1 py-3.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-full transition-all">
+                                    取消
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    disabled={isSubmitting}
+                                    className="flex-[2] py-3.5 bg-[#cbf368] hover:bg-[#b8e94e] text-[#1a2e05] font-bold rounded-full shadow-[0_4px_14px_rgba(203,243,104,0.4)] transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2"
+                                >
+                                    {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : '確認提交'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [view, setView] = useState('landing');
+            const [userRole, setUserRole] = useState(null); 
+            const [selectedLevel, setSelectedLevel] = useState(null);
+            const [selectedCategory, setSelectedCategory] = useState(null);
+            const [isSubmitOpen, setIsSubmitOpen] = useState(false);
+            
+            // Data State
+            const [tools, setTools] = useState([]);
+            const [isLoading, setIsLoading] = useState(true);
+            const [error, setError] = useState(null);
+
+            useEffect(() => {
+                const fetchSheetData = async () => {
+                    try {
+                        const response = await fetch(SHEET_CSV_URL, { cache: 'no-cache' });
+                        if (!response.ok) throw new Error('無法連線到資料庫');
+                        const text = await response.text();
+                        const rows = parseCSV(text);
+                        
+                        const parsedTools = rows.slice(1).map((row, index) => {
+                            if (row.length < 3) return null;
+                            
+                            const rawTargetUser = row[3] || 'student';
+                            const targetUser = rawTargetUser.includes('老師') ? 'teacher' : 'student';
+                            
+                            const rawCategory = row[5] || '其他';
+                            const categoryGroup = mapSubjectToGroup(rawCategory);
+
+                            return {
+                                id: row[0] || `auto-${index}`,
+                                author: row[1] || '匿名',
+                                title: row[2] || '未命名 Chatbot',
+                                targetUser: targetUser,
+                                level: row[4] || '全學制',
+                                categoryGroup: categoryGroup,
+                                rawCategory: rawCategory,
+                                description: row[6] || '無描述',
+                                copyUrl: row[7] || '',
+                                externalUrl: row[8] || '',
+                                likes: 0,
+                                liked: false,
+                                isPinned: false
+                            };
+                        }).filter(Boolean);
+
+                        setTools(parsedTools);
+                        setIsLoading(false);
+                    } catch (err) {
+                        console.error("讀取失敗，使用備用資料", err);
+                        setError("讀取最新資料失敗，目前顯示離線資料");
+                        setTools([{
+                            id: "mock-1",
+                            title: "MathGPT Pro (離線)",
+                            author: "系統",
+                            description: "這是讀取失敗時的範例資料。請檢查您的網路連線。",
+                            targetUser: "student",
+                            level: "高中",
+                            categoryGroup: "數理科技",
+                            copyUrl: "#",
+                            externalUrl: "#",
+                            likes: 0,
+                            isPinned: false
+                        }]);
+                        setIsLoading(false);
+                    }
+                };
+
+                fetchSheetData();
+            }, []);
+
+            const filteredTools = useMemo(() => {
+                const sorted = [...tools].sort((a, b) => {
+                    if (a.isPinned === b.isPinned) return 0;
+                    return a.isPinned ? -1 : 1;
+                });
+
+                return sorted.filter(t => {
+                    if (view === 'resources') {
+                        if (userRole === 'teacher') {
+                            return t.targetUser === 'teacher';
+                        } else {
+                            const levelMatch = t.level.includes(selectedLevel) || t.level === '全學制' || selectedLevel === '全學制';
+                            const catMatch = t.categoryGroup === selectedCategory;
+                            return t.targetUser === 'student' && levelMatch && catMatch;
+                        }
+                    }
+                    return true;
+                });
+            }, [tools, view, userRole, selectedLevel, selectedCategory]);
+
+            const handleToggleLike = (id) => {
+                setTools(prev => prev.map(t => {
+                    if (t.id === id) {
+                        return { ...t, likes: t.liked ? t.likes - 1 : t.likes + 1, liked: !t.liked };
+                    }
+                    return t;
+                }));
+            };
+
+            const handleTogglePin = (id) => {
+                setTools(prev => prev.map(t => {
+                    if (t.id === id) {
+                        return { ...t, isPinned: !t.isPinned };
+                    }
+                    return t;
+                }));
+            };
+
+            const handleRoleSelect = (role) => {
+                setUserRole(role);
+                if (role === 'teacher') {
+                    setView('resources');
+                } else {
+                    setView('student-level');
+                }
+            };
+
+            const handleLevelSelect = (level) => {
+                setSelectedLevel(level);
+                setView('student-category');
+            };
+
+            const handleCategorySelect = (categoryName) => {
+                setSelectedCategory(categoryName);
+                setView('resources');
+            };
+
+            const goHome = () => {
+                setView('landing');
+                setUserRole(null);
+                setSelectedLevel(null);
+                setSelectedCategory(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#cbf368] selection:text-[#1a2e05] overflow-x-hidden">
+                    
+                    {/* Navbar */}
+                    <header className="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md h-20 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
+                            <div className="flex items-center gap-6">
+                                <div onClick={goHome} className="transition-transform active:scale-95">
+                                    <Logo />
+                                </div>
+                                <a 
+                                    href="https://www.edcafechinese.com/" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="hidden sm:flex items-center gap-2 text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors border-l border-slate-300 pl-6"
+                                >
+                                    {Home && <Home size={16} />}
+                                    官方網站
+                                </a>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 md:gap-4">
+                                <a 
+                                    href="https://www.edcafechinese.com/" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="flex sm:hidden items-center justify-center w-9 h-9 text-slate-500 hover:text-slate-900 bg-slate-100 rounded-full"
+                                >
+                                    {Home && <Home size={18} />}
+                                </a>
+
+                                {view !== 'landing' && (
+                                    <button 
+                                        onClick={goHome}
+                                        className="hidden md:flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-black transition-colors mr-2"
+                                    >
+                                        重選身分
+                                    </button>
+                                )}
+
+                                <a 
+                                    href="https://www.facebook.com/share/v/17kajBsPbN/" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-sm font-bold text-slate-600 transition-all group"
+                                >
+                                    {BookOpenCheck && <BookOpenCheck size={16} className="text-[#3b82f6]" />}
+                                    <span>分享教學</span>
+                                </a>
+
+                                <button 
+                                    onClick={() => setIsSubmitOpen(true)}
+                                    className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#bef264] hover:bg-[#a3e635] text-[#1a2e05] text-sm font-bold transition-all shadow-[0_4px_14px_rgba(203,243,104,0.3)] hover:shadow-[0_6px_20px_rgba(203,243,104,0.4)] transform hover:-translate-y-0.5"
+                                >
+                                    {Plus && <Plus size={18} className="text-[#1a2e05]" />}
+                                    <span>分享 Chatbot</span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Area */}
+                    <main className="pt-32 pb-12 px-4 max-w-7xl mx-auto min-h-[calc(100vh-80px)] flex flex-col items-center">
+                        
+                        {isLoading && (
+                            <div className="fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
+                                {Loader2 && <Loader2 className="w-10 h-10 text-[#bef264] animate-spin mb-4" />}
+                                <p className="text-slate-500 font-bold">正在讀取最新 Chatbot 資料庫...</p>
+                            </div>
+                        )}
+
+                        {error && (
+                            <div className="mb-8 p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-2">
+                                {AlertCircle && <AlertCircle size={20} />}
+                                {error}
+                            </div>
+                        )}
+                        
+                        {/* VIEW 1: Landing Page */}
+                        {view === 'landing' && (
+                            <div className="w-full max-w-5xl animate-fade-in-up text-center flex flex-col items-center">
+                                <div className="mb-20">
+                                    <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-tight font-serif">
+                                        AI Chatbot <span className="whitespace-nowrap">共享平台</span>
+                                    </h1>
+                                    
+                                    <div className="relative inline-block mt-2">
+                                        <p className="text-2xl md:text-3xl font-bold text-slate-600 font-sans tracking-tight">
+                                            Edcafe 教育版 ChatGPT
+                                        </p>
+                                        <div className="absolute -bottom-2 left-0 w-full h-3 bg-[#bef264] -z-10 opacity-60 rounded-full transform -rotate-1"></div>
+                                    </div>
+
+                                    <p className="text-lg text-slate-500 mt-8 max-w-2xl mx-auto font-medium">
+                                        歡迎老師使用、複製其他老師的 Chatbot，也把自己的 Chatbot 分享出來。
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 w-full max-w-4xl mb-12">
+                                    <button 
+                                        onClick={() => handleRoleSelect('teacher')}
+                                        className="group h-80 bg-[#f3e8ff] hover:bg-[#e9d5ff] rounded-[2rem] p-8 flex flex-col items-center justify-center gap-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
+                                    >
+                                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-all duration-300">
+                                            {GraduationCap && <GraduationCap size={40} className="text-[#9333ea]" />}
+                                        </div>
+                                        <div className="text-center">
+                                            <h2 className="text-3xl font-bold text-[#581c87] mb-3 tracking-tight font-serif">老師使用</h2>
+                                            <p className="text-[#7e22ce] font-medium text-lg">尋找備課資源、班級經營工具</p>
+                                        </div>
+                                    </button>
+
+                                    <button 
+                                        onClick={() => handleRoleSelect('student')}
+                                        className="group h-80 bg-[#dcfce7] hover:bg-[#bbf7d0] rounded-[2rem] p-8 flex flex-col items-center justify-center gap-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
+                                    >
+                                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-all duration-300">
+                                            {BookOpen && <BookOpen size={40} className="text-[#16a34a]" />}
+                                        </div>
+                                        <div className="text-center">
+                                            <h2 className="text-3xl font-bold text-[#14532d] mb-3 tracking-tight font-serif">學生使用</h2>
+                                            <p className="text-[#15803d] font-medium text-lg">尋找學習助手、解題工具</p>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <div className="flex flex-wrap justify-center gap-4 w-full max-w-xl">
+                                    <a 
+                                        href="https://app.edcafe.ai/" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white font-bold hover:bg-slate-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                                    >
+                                        {UserPlus && <UserPlus size={18} />}
+                                        立即註冊
+                                    </a>
+                                    <a 
+                                        href="https://futurekn.store/" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-slate-200 text-slate-900 font-bold hover:bg-slate-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                                    >
+                                        {ShoppingCart && <ShoppingCart size={18} />}
+                                        立即購買
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* VIEW 2: Level Selection */}
+                        {view === 'student-level' && (
+                            <div className="w-full max-w-5xl animate-fade-in text-center">
+                                <button onClick={goHome} className="absolute left-4 md:left-auto top-32 mb-10 text-slate-400 hover:text-slate-900 font-bold flex items-center gap-2 transition-colors">
+                                    <span className="p-2 rounded-full bg-slate-50 border border-slate-100">
+                                        {ArrowRight && <ArrowRight className="rotate-180" size={16}/>}
+                                    </span> 
+                                    返回
+                                </button>
+
+                                <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-16 font-serif">
+                                    選擇您的學習階段
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {['國小', '國中', '高中'].map((level, index) => {
+                                        const colors = ['bg-[#e0f2fe] hover:bg-[#bae6fd] text-[#0369a1]', 'bg-[#fef9c3] hover:bg-[#fde047] text-[#a16207]', 'bg-[#ffedd5] hover:bg-[#fdba74] text-[#c2410c]'];
+                                        return (
+                                            <button key={level} onClick={() => handleLevelSelect(level)} className={`${colors[index % 3]} p-12 rounded-[2rem] transition-all text-2xl font-bold hover:shadow-xl flex flex-col items-center gap-6 group hover:-translate-y-1`}>
+                                                <div className="p-6 rounded-full bg-white/60 text-current shadow-sm group-hover:bg-white transition-colors">
+                                                    {School && <School className="w-10 h-10" />}
+                                                </div>
+                                                <span className="font-serif">{level}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* VIEW 3: Category Selection */}
+                        {view === 'student-category' && (
+                            <div className="w-full max-w-6xl animate-fade-in text-center">
+                                <div className="flex justify-center items-center gap-2 mb-10 text-sm font-bold text-slate-400">
+                                    <span onClick={goHome} className="cursor-pointer hover:text-slate-900">首頁</span>
+                                    {ChevronRight && <ChevronRight size={14} />}
+                                    <span onClick={() => setView('student-level')} className="cursor-pointer hover:text-slate-900">學生 ({selectedLevel})</span>
+                                    {ChevronRight && <ChevronRight size={14} />}
+                                    <span className="text-slate-900">選擇類別</span>
+                                </div>
+
+                                <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-16 font-serif">
+                                    您想尋找哪一類的 <span className="relative inline-block">Chatbot<span className="absolute bottom-1 left-0 w-full h-3 bg-[#bef264] -z-10 opacity-50 rounded-full"></span></span>？
+                                </h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                                    {MAJOR_CATEGORIES.map((cat) => {
+                                        const Icon = cat.icon;
+                                        return (
+                                            <button
+                                                key={cat.name}
+                                                onClick={() => handleCategorySelect(cat.name)}
+                                                className={`h-64 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-4 text-center transition-all hover:-translate-y-2 hover:shadow-xl ${cat.color} hover:opacity-90`}
+                                            >
+                                                <div className="p-5 rounded-full bg-white shadow-sm">
+                                                    {Icon && <Icon size={32} />}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-bold mb-2 font-serif">{cat.name}</h3>
+                                                    <p className="text-xs opacity-80">{cat.subjects.join(' / ')}</p>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* VIEW 4: Resource List */}
+                        {view === 'resources' && (
+                            <div className="w-full animate-fade-in">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+                                    <div>
+                                        <div className="flex items-center gap-2 text-sm font-bold text-slate-400 mb-4">
+                                            <button onClick={goHome} className="hover:text-slate-900">首頁</button>
+                                            {ChevronRight && <ChevronRight size={14} />}
+                                            {userRole === 'teacher' ? (
+                                                <span className="text-[#7e22ce] bg-[#faf5ff] px-3 py-1 rounded-full border border-[#f3e8ff]">老師專區</span>
+                                            ) : (
+                                                <>
+                                                    <button onClick={() => setView('student-level')} className="hover:text-slate-900">{selectedLevel}</button>
+                                                    {ChevronRight && <ChevronRight size={14} />}
+                                                    <span className="text-[#15803d] bg-[#f0fdf4] px-3 py-1 rounded-full border border-[#dcfce7]">{selectedCategory}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                        <h2 className="text-4xl font-black text-slate-900 flex items-center gap-3 font-serif">
+                                            {userRole === 'teacher' ? '教師 Chatbot 資源庫' : `${selectedLevel} ${selectedCategory} 資源`}
+                                            <span className="text-base font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-sans align-middle">
+                                                {filteredTools.length}
+                                            </span>
+                                        </h2>
+                                    </div>
+                                    
+                                    <div className="flex gap-3 w-full md:w-auto">
+                                        <div className="relative flex-1 md:w-72">
+                                            {Search && <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />}
+                                            <input type="text" placeholder="搜尋 Chatbot..." className="w-full bg-slate-50 border border-slate-200 rounded-full py-3 pl-11 pr-4 text-sm font-medium focus:outline-none focus:border-[#bef264] focus:bg-white transition-all shadow-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {filteredTools.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {filteredTools.map(tool => (
+                                            <ToolCard 
+                                                key={tool.id} 
+                                                tool={tool} 
+                                                onToggleLike={handleToggleLike}
+                                                onTogglePin={handleTogglePin}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-24 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                            {Smile && <Smile className="w-10 h-10 text-slate-300" />}
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-slate-900 mb-3 font-serif">目前尚無相關 Chatbot</h3>
+                                        <p className="text-slate-500 mb-8 max-w-md mx-auto">
+                                            成為第一位分享的先驅者，幫助更多師生。
+                                        </p>
+                                        <button onClick={() => setIsSubmitOpen(true)} className="px-8 py-3 bg-[#bef264] hover:bg-[#a3e635] text-[#1a2e05] rounded-full font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                                            立即分享 Chatbot
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                    </main>
+                    <footer className="border-t border-slate-100 bg-white py-12 text-center text-slate-500 text-sm font-medium">
+                        <p className="mb-2">&copy; 2024 AI Chatbot Platform. Powered by EdCafe.</p>
+                        <p>致力於打造 AI 教育永續生態圈</p>
+                    </footer>
+                    <SubmitModal isOpen={isSubmitOpen} onClose={() => setIsSubmitOpen(false)} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
