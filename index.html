@@ -12,8 +12,6 @@
     
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide-react.min.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
         
@@ -43,38 +41,50 @@
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
-        
-        // 從 library 解構通用圖標
-        const { 
-            BookOpen, GraduationCap, Share2, Search, Filter, ArrowRight, Plus, X, 
-            ChevronRight, Sparkles, School, ExternalLink, BookOpenCheck, AlertCircle, 
-            Users, Palette, Globe, Calculator, Copy, Smile, Leaf, Mail, 
-            Loader2, ShoppingCart, UserPlus, Home, Backpack, Presentation
-        } = window.lucideReact || {};
 
-        // ★★★ 核心修正：手動定義 SVG 元件，確保 100% 顯示，不依賴 CDN 載入狀況 ★★★
-        
-        // 1. 強制定義 Line Logo (官方綠色)
+        // --- ★★★ 全面嵌入 SVG 圖標庫 ★★★ ---
+        // 這些元件取代了原本從 lucide-react 引入的圖標
+
+        const IconBase = ({ children, size = 24, className = "", ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+                {children}
+            </svg>
+        );
+
         const LineIcon = () => (
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#06C755">
                 <path d="M21.24 10.75c0-4.83-4.52-8.75-10.04-8.75S1.16 5.92 1.16 10.75c0 3.86 3.09 7.15 7.37 8.24l-1.05 3.32c-.1.32.25.59.55.43l4.78-3.04c.46.03.93.05 1.4.05 5.52 0 10.04-3.92 10.04-8.75z"/>
             </svg>
         );
-
-        // 2. 強制定義 Pin (圖釘) Icon
-        const PinIcon = ({ className, size = 24, fill = "none" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                <line x1="12" y1="17" x2="12" y2="22"></line>
-                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
-            </svg>
-        );
-
-        // 3. 強制定義 Heart (愛心) Icon
-        const HeartIcon = ({ className, size = 24 }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-            </svg>
-        );
+        const PinIcon = (props) => <IconBase {...props}><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></IconBase>;
+        const HeartIcon = ({ fill = "none", ...props }) => <IconBase fill={fill} {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></IconBase>;
+        const BookOpenIcon = (props) => <IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></IconBase>;
+        const PresentationIcon = (props) => <IconBase {...props}><path d="M2 3h20"></path><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path><path d="m7 21 5-5 5 5"></path></IconBase>;
+        const BackpackIcon = (props) => <IconBase {...props}><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"></path><path d="M8 10h8"></path><path d="M8 18h8"></path></IconBase>;
+        const SchoolIcon = (props) => <IconBase {...props}><path d="M14 22v-4a2 2 0 1 0-4 0v4"></path><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"></path><path d="M18 5v17"></path><path d="m4 6 8-4 8 4"></path><path d="M6 5v17"></path><circle cx="12" cy="9" r="2"></circle></IconBase>;
+        const GraduationCapIcon = (props) => <IconBase {...props}><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></IconBase>;
+        const GlobeIcon = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></IconBase>;
+        const CalculatorIcon = (props) => <IconBase {...props}><rect width="16" height="20" x="4" y="2" rx="2"></rect><line x1="8" x2="16" y1="6" y2="6"></line><line x1="16" x2="16" y1="14" y2="18"></line><path d="M16 10h.01"></path><path d="M12 10h.01"></path><path d="M8 10h.01"></path><path d="M12 14h.01"></path><path d="M8 14h.01"></path><path d="M12 18h.01"></path><path d="M8 18h.01"></path></IconBase>;
+        const UsersIcon = (props) => <IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></IconBase>;
+        const PaletteIcon = (props) => <IconBase {...props}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></IconBase>;
+        const SparklesIcon = (props) => <IconBase {...props}><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></IconBase>;
+        const HomeIcon = (props) => <IconBase {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></IconBase>;
+        const UserPlusIcon = (props) => <IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" x2="19" y1="8" y2="14"></line><line x1="22" x2="16" y1="11" y2="11"></line></IconBase>;
+        const ShoppingCartIcon = (props) => <IconBase {...props}><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></IconBase>;
+        const PlusIcon = (props) => <IconBase {...props}><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></IconBase>;
+        const ArrowRightIcon = (props) => <IconBase {...props}><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></IconBase>;
+        const ChevronRightIcon = (props) => <IconBase {...props}><polyline points="9 18 15 12 9 6"></polyline></IconBase>;
+        const SearchIcon = (props) => <IconBase {...props}><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></IconBase>;
+        const CopyIcon = (props) => <IconBase {...props}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></IconBase>;
+        const ExternalLinkIcon = (props) => <IconBase {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" x2="21" y1="14" y2="3"></line></IconBase>;
+        const SmileIcon = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></IconBase>;
+        const XIcon = (props) => <IconBase {...props}><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></IconBase>;
+        const Share2Icon = (props) => <IconBase {...props}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></IconBase>;
+        const MailIcon = (props) => <IconBase {...props}><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></IconBase>;
+        const BookOpenCheckIcon = (props) => <IconBase {...props}><path d="M8 3H2v15h7.06a.5.5 0 0 1 .34.15L12 21l2.6-2.85a.5.5 0 0 1 .34-.15H22V3h-6a5 5 0 0 0-5 5c0 1.75.95 3.21 2.36 4.15"></path><path d="m16 10 2 2 4-4"></path><path d="M12 18a5 5 0 0 1-5-5H2"></path></IconBase>;
+        const AlertCircleIcon = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></IconBase>;
+        const Loader2Icon = (props) => <IconBase {...props}><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></IconBase>;
+        const LeafIcon = (props) => <IconBase {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.5 12 13 13 12"></path></IconBase>;
 
         // --- 設定 Configuration ---
         const SHEET_ID = "1dQ2CZRpp9GM-LUvZWVQiT4M2w5QJ5QaPfayY-XW0VxA";
@@ -82,11 +92,11 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZQuswrA-SxFqFuGIYGlFGxAeqdgVx72RdGiGH7cYLVypMhF3Fq12GMHZ68P41kf2qEw/exec"; 
 
         const MAJOR_CATEGORIES = [
-            { name: "語文領域", icon: Globe, subjects: ["語文", "國語", "英語", "國文", "英文", "寫作", "閱讀", "語言"], color: "bg-[#fff7ed] text-[#ea580c] border-[#ffedd5]" },
-            { name: "數理科技", icon: Calculator, subjects: ["數理", "數學", "自然", "資訊", "物理", "化學", "生物", "理化", "科技", "科學"], color: "bg-[#eff6ff] text-[#2563eb] border-[#dbeafe]" },
-            { name: "人文社會", icon: Users, subjects: ["人文", "社會", "歷史", "地理", "公民", "綜合", "輔導", "心理"], color: "bg-[#fefce8] text-[#ca8a04] border-[#fef9c3]" },
-            { name: "藝術健體", icon: Palette, subjects: ["藝術健體", "藝術健康", "藝術", "音樂", "美術", "體育", "健康", "健體", "表演"], color: "bg-[#faf5ff] text-[#9333ea] border-[#f3e8ff]" },
-            { name: "其他/不分科", icon: Sparkles, subjects: ["其他", "不分科", "班級經營", "行政", "特殊教育", "跨領域"], color: "bg-[#f8fafc] text-[#475569] border-[#e2e8f0]" }
+            { name: "語文領域", icon: GlobeIcon, subjects: ["語文", "國語", "英語", "國文", "英文", "寫作", "閱讀", "語言"], color: "bg-[#fff7ed] text-[#ea580c] border-[#ffedd5]" },
+            { name: "數理科技", icon: CalculatorIcon, subjects: ["數理", "數學", "自然", "資訊", "物理", "化學", "生物", "理化", "科技", "科學"], color: "bg-[#eff6ff] text-[#2563eb] border-[#dbeafe]" },
+            { name: "人文社會", icon: UsersIcon, subjects: ["人文", "社會", "歷史", "地理", "公民", "綜合", "輔導", "心理"], color: "bg-[#fefce8] text-[#ca8a04] border-[#fef9c3]" },
+            { name: "藝術健體", icon: PaletteIcon, subjects: ["藝術健體", "藝術健康", "藝術", "音樂", "美術", "體育", "健康", "健體", "表演"], color: "bg-[#faf5ff] text-[#9333ea] border-[#f3e8ff]" },
+            { name: "其他/不分科", icon: SparklesIcon, subjects: ["其他", "不分科", "班級經營", "行政", "特殊教育", "跨領域"], color: "bg-[#f8fafc] text-[#475569] border-[#e2e8f0]" }
         ];
 
         const LEVELS_FORM = ["國小", "國中", "高中"];
@@ -136,7 +146,7 @@
 
         const getCategoryIcon = (categoryName) => {
             const cat = MAJOR_CATEGORIES.find(c => c.name === categoryName);
-            return cat ? cat.icon : Sparkles;
+            return cat ? cat.icon : SparklesIcon;
         };
 
         const mapSubjectToGroup = (subject) => {
@@ -165,7 +175,7 @@
                 />
                  {/* Fallback Icon container */}
                 <div className="hidden relative w-12 h-12 items-center justify-center text-[#9fd53e] bg-white rounded-full shadow-sm">
-                      {Leaf && <Leaf size={32} fill="currentColor" strokeWidth={0} />}
+                      <LeafIcon size={32} fill="currentColor" strokeWidth={0} />
                 </div>
                 
                 <div className="flex flex-col justify-center ml-1">
@@ -177,7 +187,6 @@
         );
 
         // Social Media Icons Component
-        // ★★★ 修正點 2：Line Logo 替換為我們自定義的 LineIcon 元件 ★★★
         const SocialMediaIcons = () => (
             <div className="flex items-center justify-center gap-6 mt-8 animate-fade-in-up delay-100">
                 {/* WhatsApp */}
@@ -187,7 +196,7 @@
                     </svg>
                 </a>
                 
-                {/* Line (Official Style Fixed) - 使用上面定義的 LineIcon */}
+                {/* Line (Official Style Fixed) */}
                 <a href="https://line.me/R/ti/p/@470qfati?oat_content=qr" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
                     <LineIcon />
                 </a>
@@ -218,7 +227,6 @@
         );
 
         // ToolCard Component
-        // ★★★ 修正點 1 & 3：使用自定義的 PinIcon 和 HeartIcon，保證功能可見 ★★★
         const ToolCard = ({ tool, onToggleLike, onTogglePin }) => {
             const catStyle = getCategoryStyle(tool.categoryGroup);
             const CategoryIcon = getCategoryIcon(tool.categoryGroup);
@@ -226,7 +234,7 @@
             return (
                 <div className={`group relative bg-white border ${tool.isPinned ? 'border-[#bef264] ring-1 ring-[#bef264] shadow-[0_0_20px_rgba(190,242,100,0.15)]' : 'border-slate-100'} rounded-3xl p-7 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 flex flex-col h-full animate-fade-in`}>
                     
-                    {/* 至頂按鈕 (Pin Button) - 使用自定義 PinIcon */}
+                    {/* 至頂按鈕 (Pin Button) */}
                     <button 
                         onClick={(e) => { e.stopPropagation(); onTogglePin(tool.id); }}
                         className={`absolute top-5 right-5 z-10 p-2 rounded-full transition-all ${tool.isPinned ? 'text-[#4d7c0f] bg-[#bef264]' : 'text-slate-300 hover:text-[#4d7c0f] hover:bg-[#ecfccb]'}`}
@@ -241,7 +249,7 @@
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
                             <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                                {Users && <Users size={14} />}
+                                <UsersIcon size={14} />
                             </div>
                             <span>由 {tool.author} 製作</span>
                         </div>
@@ -250,12 +258,12 @@
                     <div className="flex flex-wrap gap-2 mb-4">
                         {tool.targetUser === 'student' && tool.level && (
                             <span className="px-2.5 py-0.5 text-xs font-bold rounded-md bg-slate-100 text-slate-600 border border-slate-200 flex items-center">
-                                {School && <School size={14} className="mr-1" />}
+                                <SchoolIcon size={14} className="mr-1" />
                                 {tool.level}
                             </span>
                         )}
                         <span className={`px-2.5 py-0.5 text-xs font-bold rounded-md border ${catStyle} flex items-center`}>
-                            {CategoryIcon && <CategoryIcon size={14} className="mr-1" />}
+                            <CategoryIcon size={14} className="mr-1" />
                             {tool.categoryGroup}
                         </span>
                     </div>
@@ -270,7 +278,7 @@
                             disabled={!tool.copyUrl}
                             className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#354f38] hover:bg-[#273b2a] disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all shadow-sm"
                         >
-                            {Copy && <Copy size={16} />}
+                            <CopyIcon size={16} />
                             複製至帳號
                         </button>
                         <button 
@@ -278,7 +286,7 @@
                             disabled={!tool.externalUrl}
                             className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#354f38] hover:bg-[#273b2a] disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all shadow-sm"
                         >
-                            {ExternalLink && <ExternalLink size={16} />}
+                            <ExternalLinkIcon size={16} />
                             新頁面開啟
                         </button>
                     </div>
@@ -287,14 +295,15 @@
                         <span className="text-xs text-slate-400 font-medium">
                             {tool.targetUser === 'teacher' ? '老師專用' : '學生專用'}
                         </span>
-                        {/* 點讚按鈕 (Like Button) - 使用自定義 HeartIcon */}
+                        {/* 點讚按鈕 (Like Button) */}
                         <button 
                             onClick={() => onToggleLike(tool)}
                             className="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-red-500 transition-colors group/like"
                         >
                             <HeartIcon 
                                 size={18} 
-                                className={`transition-transform group-active/like:scale-125 ${tool.liked ? 'text-red-500 fill-red-500' : 'fill-none'}`} 
+                                className={`transition-transform group-active/like:scale-125 ${tool.liked ? 'text-red-500' : ''}`}
+                                fill={tool.liked ? "currentColor" : "none"} 
                             />
                             <span>{tool.likes}</span>
                         </button>
@@ -371,12 +380,12 @@
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in overflow-y-auto">
                     <div className="bg-white border border-slate-100 rounded-[2rem] w-full max-w-2xl p-8 shadow-2xl relative my-8">
                         <button onClick={onClose} className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors">
-                            {X && <X size={24} />}
+                            <XIcon size={24} />
                         </button>
                         
                         <h2 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3 font-serif">
                             <div className="p-3 rounded-2xl bg-[#cbf368] text-[#1a2e05]">
-                                {Share2 && <Share2 className="w-6 h-6" />}
+                                <Share2Icon className="w-6 h-6" />
                             </div>
                             分享你的 AI Chatbot
                         </h2>
@@ -407,7 +416,7 @@
                                             placeholder="name@example.com" 
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 pl-10 text-slate-900 focus:outline-none focus:border-[#cbf368] focus:ring-4 focus:ring-[#cbf368]/20 transition-all placeholder:text-slate-400" 
                                         />
-                                        {Mail && <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />}
+                                        <MailIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     </div>
                                 </div>
                                 <div className="md:col-span-2">
@@ -436,7 +445,7 @@
                                             onChange={() => setTargetUser('teacher')}
                                             className="hidden" 
                                         />
-                                        {GraduationCap && <GraduationCap size={20} />}
+                                        <GraduationCapIcon size={20} />
                                         老師使用
                                     </label>
                                     <label className={`flex-1 cursor-pointer border-2 rounded-xl p-4 flex items-center justify-center gap-3 transition-all ${targetUser === 'student' ? 'border-[#cbf368] bg-white shadow-sm text-black font-bold' : 'border-transparent bg-white text-slate-500 hover:bg-slate-100'}`}>
@@ -448,7 +457,7 @@
                                             onChange={() => setTargetUser('student')}
                                             className="hidden" 
                                         />
-                                        {School && <School size={20} />}
+                                        <SchoolIcon size={20} />
                                         學生使用
                                     </label>
                                 </div>
@@ -498,13 +507,13 @@
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#3b82f6] hover:bg-[#2563eb] rounded-lg transition-colors shadow-sm"
                                     >
-                                        {BookOpenCheck && <BookOpenCheck size={14} />}
+                                        <BookOpenCheckIcon size={14} />
                                         查看複製教學 (FB)
                                     </a>
                                 </div>
                                 
                                 <div className="flex items-start gap-3 mb-4">
-                                    {AlertCircle && <AlertCircle className="w-5 h-5 text-[#d97706] shrink-0 mt-0.5" />}
+                                    <AlertCircleIcon className="w-5 h-5 text-[#d97706] shrink-0 mt-0.5" />
                                     <p className="text-xs text-[#b45309] leading-relaxed font-medium">
                                         請老師務必透過<span className="font-bold underline decoration-2 decoration-[#d97706]/50">「複製整個 Chatbot」</span>的方式分享連結，而非直接分派，以確保其他老師能完整使用並保存您的作品。
                                     </p>
@@ -542,7 +551,7 @@
                                     disabled={isSubmitting}
                                     className="flex-[2] py-3.5 bg-[#cbf368] hover:bg-[#b8e94e] text-[#1a2e05] font-bold rounded-full shadow-[0_4px_14px_rgba(203,243,104,0.4)] transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2"
                                 >
-                                    {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : '確認提交'}
+                                    {isSubmitting ? <Loader2Icon className="animate-spin" size={20} /> : '確認提交'}
                                 </button>
                             </div>
                         </form>
@@ -649,21 +658,27 @@
                 });
             }, [tools, view, userRole, selectedLevel, selectedCategory]);
 
-            // 處理點讚：同時更新前端與後端
+            // --- ★★★ 修正點讚邏輯：切換狀態並傳送正確動作至後端 ★★★ ---
             const handleToggleLike = async (tool) => {
+                const newLikedStatus = !tool.liked;
+                const newLikesCount = newLikedStatus ? tool.likes + 1 : tool.likes - 1;
+                const action = newLikedStatus ? "like" : "unlike";
+
+                // 1. 先更新前端狀態，提供即時回饋
                 setTools(prev => prev.map(t => {
                     if (t.id === tool.id) {
-                        return { ...t, likes: t.likes + 1, liked: true };
+                        return { ...t, likes: newLikesCount, liked: newLikedStatus };
                     }
                     return t;
                 }));
 
+                // 2. 傳送請求到後端
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: "POST",
                         mode: "no-cors", 
                         body: JSON.stringify({
-                            action: "like",
+                            action: action, // 傳送 "like" 或 "unlike"
                             title: tool.title,
                             author: tool.author
                         }),
@@ -672,7 +687,8 @@
                         },
                     });
                 } catch (e) {
-                    console.error("點讚傳送失敗", e);
+                    console.error("點讚狀態同步失敗", e);
+                    // 可選擇在此處回滾前端狀態，或提示使用者
                 }
             };
 
@@ -727,7 +743,7 @@
                                     rel="noopener noreferrer"
                                     className="hidden sm:flex items-center gap-2 text-slate-600 hover:text-slate-900 font-bold text-xl md:text-2xl transition-colors border-l-2 border-slate-200 pl-6 tracking-tight font-sans"
                                 >
-                                    {Home && <Home size={24} strokeWidth={2.5} />}
+                                    <HomeIcon size={24} strokeWidth={2.5} />
                                     官方網站
                                 </a>
                             </div>
@@ -739,7 +755,7 @@
                                     rel="noopener noreferrer"
                                     className="flex sm:hidden items-center justify-center w-9 h-9 text-slate-500 hover:text-slate-900 bg-slate-100 rounded-full"
                                 >
-                                    {Home && <Home size={18} />}
+                                    <HomeIcon size={18} />
                                 </a>
 
                                 {view !== 'landing' && (
@@ -757,7 +773,7 @@
                                     rel="noopener noreferrer"
                                     className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-sm font-bold text-slate-600 transition-all group"
                                 >
-                                    {BookOpenCheck && <BookOpenCheck size={16} className="text-[#3b82f6]" />}
+                                    <BookOpenCheckIcon size={16} className="text-[#3b82f6]" />
                                     <span>分享教學</span>
                                 </a>
 
@@ -765,7 +781,7 @@
                                     onClick={() => setIsSubmitOpen(true)}
                                     className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#bef264] hover:bg-[#a3e635] text-[#1a2e05] text-sm font-bold transition-all shadow-[0_4px_14px_rgba(203,243,104,0.3)] hover:shadow-[0_6px_20px_rgba(203,243,104,0.4)] transform hover:-translate-y-0.5"
                                 >
-                                    {Plus && <Plus size={18} className="text-[#1a2e05]" />}
+                                    <PlusIcon size={18} className="text-[#1a2e05]" />
                                     <span>分享 Chatbot</span>
                                 </button>
                             </div>
@@ -777,14 +793,14 @@
                         
                         {isLoading && (
                             <div className="fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
-                                {Loader2 && <Loader2 className="w-10 h-10 text-[#bef264] animate-spin mb-4" />}
+                                <Loader2Icon className="w-10 h-10 text-[#bef264] animate-spin mb-4" />
                                 <p className="text-slate-500 font-bold">正在讀取最新 Chatbot 資料庫...</p>
                             </div>
                         )}
 
                         {error && (
                             <div className="mb-8 p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-2">
-                                {AlertCircle && <AlertCircle size={20} />}
+                                <AlertCircleIcon size={20} />
                                 {error}
                             </div>
                         )}
@@ -815,7 +831,7 @@
                                         className="group h-80 bg-[#f3e8ff] hover:bg-[#e9d5ff] rounded-[2rem] p-8 flex flex-col items-center justify-center gap-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
                                     >
                                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-all duration-300">
-                                            {Presentation && <Presentation size={40} className="text-[#9333ea]" />}
+                                            <PresentationIcon size={40} className="text-[#9333ea]" />
                                         </div>
                                         <div className="text-center">
                                             <h2 className="text-3xl font-bold text-[#581c87] mb-3 tracking-tight font-serif">老師使用</h2>
@@ -828,7 +844,7 @@
                                         className="group h-80 bg-[#dcfce7] hover:bg-[#bbf7d0] rounded-[2rem] p-8 flex flex-col items-center justify-center gap-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
                                     >
                                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-all duration-300">
-                                            {BookOpen && <BookOpen size={40} className="text-[#16a34a]" />}
+                                            <BookOpenIcon size={40} className="text-[#16a34a]" />
                                         </div>
                                         <div className="text-center">
                                             <h2 className="text-3xl font-bold text-[#14532d] mb-3 tracking-tight font-serif">學生使用</h2>
@@ -844,7 +860,7 @@
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white font-bold hover:bg-slate-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                                     >
-                                        {UserPlus && <UserPlus size={18} />}
+                                        <UserPlusIcon size={18} />
                                         立即註冊
                                     </a>
                                     <a 
@@ -853,7 +869,7 @@
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-slate-200 text-slate-900 font-bold hover:bg-slate-50 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                                     >
-                                        {ShoppingCart && <ShoppingCart size={18} />}
+                                        <ShoppingCartIcon size={18} />
                                         立即購買
                                     </a>
                                 </div>
@@ -867,7 +883,7 @@
                             <div className="w-full max-w-5xl animate-fade-in text-center">
                                 <button onClick={goHome} className="absolute left-4 md:left-auto top-32 mb-10 text-slate-400 hover:text-slate-900 font-bold flex items-center gap-2 transition-colors">
                                     <span className="p-2 rounded-full bg-slate-50 border border-slate-100">
-                                        {ArrowRight && <ArrowRight className="rotate-180" size={16}/>}
+                                        <ArrowRightIcon className="rotate-180" size={16}/>
                                     </span> 
                                     返回
                                 </button>
@@ -878,14 +894,14 @@
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {['國小', '國中', '高中'].map((level, index) => {
                                         const colors = ['bg-[#e0f2fe] hover:bg-[#bae6fd] text-[#0369a1]', 'bg-[#fef9c3] hover:bg-[#fde047] text-[#a16207]', 'bg-[#ffedd5] hover:bg-[#fdba74] text-[#c2410c]'];
-                                        let LevelIcon = School;
-                                        if (level === '國小') LevelIcon = Backpack;
-                                        if (level === '高中') LevelIcon = GraduationCap;
+                                        let LevelIcon = SchoolIcon;
+                                        if (level === '國小') LevelIcon = BackpackIcon;
+                                        if (level === '高中') LevelIcon = GraduationCapIcon;
 
                                         return (
                                             <button key={level} onClick={() => handleLevelSelect(level)} className={`${colors[index % 3]} p-12 rounded-[2rem] transition-all text-2xl font-bold hover:shadow-xl flex flex-col items-center gap-6 group hover:-translate-y-1`}>
                                                 <div className="p-6 rounded-full bg-white/60 text-current shadow-sm group-hover:bg-white transition-colors">
-                                                    {LevelIcon && <LevelIcon className="w-10 h-10" />}
+                                                    <LevelIcon className="w-10 h-10" />
                                                 </div>
                                                 <span className="font-serif">{level}</span>
                                             </button>
@@ -900,9 +916,9 @@
                             <div className="w-full max-w-6xl animate-fade-in text-center">
                                 <div className="flex justify-center items-center gap-2 mb-10 text-sm font-bold text-slate-400">
                                     <span onClick={goHome} className="cursor-pointer hover:text-slate-900">首頁</span>
-                                    {ChevronRight && <ChevronRight size={14} />}
+                                    <ChevronRightIcon size={14} />
                                     <span onClick={() => setView('student-level')} className="cursor-pointer hover:text-slate-900">學生 ({selectedLevel})</span>
-                                    {ChevronRight && <ChevronRight size={14} />}
+                                    <ChevronRightIcon size={14} />
                                     <span className="text-slate-900">選擇類別</span>
                                 </div>
 
@@ -920,7 +936,7 @@
                                                 className={`h-64 rounded-[2rem] p-6 flex flex-col items-center justify-center gap-4 text-center transition-all hover:-translate-y-2 hover:shadow-xl ${cat.color} hover:opacity-90`}
                                             >
                                                 <div className="p-5 rounded-full bg-white shadow-sm">
-                                                    {Icon && <Icon size={32} />}
+                                                    <Icon size={32} />
                                                 </div>
                                                 <div>
                                                     <h3 className="text-xl font-bold mb-2 font-serif">{cat.name}</h3>
@@ -940,13 +956,13 @@
                                     <div>
                                         <div className="flex items-center gap-2 text-sm font-bold text-slate-400 mb-4">
                                             <button onClick={goHome} className="hover:text-slate-900">首頁</button>
-                                            {ChevronRight && <ChevronRight size={14} />}
+                                            <ChevronRightIcon size={14} />
                                             {userRole === 'teacher' ? (
                                                 <span className="text-[#7e22ce] bg-[#faf5ff] px-3 py-1 rounded-full border border-[#f3e8ff]">老師專區</span>
                                             ) : (
                                                 <>
                                                     <button onClick={() => setView('student-level')} className="hover:text-slate-900">{selectedLevel}</button>
-                                                    {ChevronRight && <ChevronRight size={14} />}
+                                                    <ChevronRightIcon size={14} />
                                                     <span className="text-[#15803d] bg-[#f0fdf4] px-3 py-1 rounded-full border border-[#dcfce7]">{selectedCategory}</span>
                                                 </>
                                             )}
@@ -961,7 +977,7 @@
                                     
                                     <div className="flex gap-3 w-full md:w-auto">
                                         <div className="relative flex-1 md:w-72">
-                                            {Search && <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />}
+                                            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                             <input type="text" placeholder="搜尋 Chatbot..." className="w-full bg-slate-50 border border-slate-200 rounded-full py-3 pl-11 pr-4 text-sm font-medium focus:outline-none focus:border-[#bef264] focus:bg-white transition-all shadow-sm" />
                                         </div>
                                     </div>
@@ -981,7 +997,7 @@
                                 ) : (
                                     <div className="text-center py-24 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
                                         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                                            {Smile && <Smile className="w-10 h-10 text-slate-300" />}
+                                            <SmileIcon className="w-10 h-10 text-slate-300" />
                                         </div>
                                         <h3 className="text-2xl font-bold text-slate-900 mb-3 font-serif">目前尚無相關 Chatbot</h3>
                                         <p className="text-slate-500 mb-8 max-w-md mx-auto">
