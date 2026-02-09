@@ -44,19 +44,41 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
         
-        // --- 1. Icon 修正：確保 Pin 和 Heart 都在這裡 ---
+        // 從 library 解構通用圖標
         const { 
             BookOpen, GraduationCap, Share2, Search, Filter, ArrowRight, Plus, X, 
             ChevronRight, Sparkles, School, ExternalLink, BookOpenCheck, AlertCircle, 
-            Users, Palette, Globe, Calculator, Copy, Smile, Leaf, Heart, Pin, Mail, 
-            Loader2, ShoppingCart, UserPlus, Home, Backpack, Presentation, Library
+            Users, Palette, Globe, Calculator, Copy, Smile, Leaf, Mail, 
+            Loader2, ShoppingCart, UserPlus, Home, Backpack, Presentation
         } = window.lucideReact || {};
+
+        // ★★★ 核心修正：手動定義 SVG 元件，確保 100% 顯示，不依賴 CDN 載入狀況 ★★★
+        
+        // 1. 強制定義 Line Logo (官方綠色)
+        const LineIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#06C755">
+                <path d="M21.24 10.75c0-4.83-4.52-8.75-10.04-8.75S1.16 5.92 1.16 10.75c0 3.86 3.09 7.15 7.37 8.24l-1.05 3.32c-.1.32.25.59.55.43l4.78-3.04c.46.03.93.05 1.4.05 5.52 0 10.04-3.92 10.04-8.75z"/>
+            </svg>
+        );
+
+        // 2. 強制定義 Pin (圖釘) Icon
+        const PinIcon = ({ className, size = 24, fill = "none" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <line x1="12" y1="17" x2="12" y2="22"></line>
+                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+            </svg>
+        );
+
+        // 3. 強制定義 Heart (愛心) Icon
+        const HeartIcon = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            </svg>
+        );
 
         // --- 設定 Configuration ---
         const SHEET_ID = "1dQ2CZRpp9GM-LUvZWVQiT4M2w5QJ5QaPfayY-XW0VxA";
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-        
-        // Google Apps Script 網址
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZQuswrA-SxFqFuGIYGlFGxAeqdgVx72RdGiGH7cYLVypMhF3Fq12GMHZ68P41kf2qEw/exec"; 
 
         const MAJOR_CATEGORIES = [
@@ -155,7 +177,7 @@
         );
 
         // Social Media Icons Component
-        // --- 2. LINE Logo 修正：使用官方綠色樣式 ---
+        // ★★★ 修正點 2：Line Logo 替換為我們自定義的 LineIcon 元件 ★★★
         const SocialMediaIcons = () => (
             <div className="flex items-center justify-center gap-6 mt-8 animate-fade-in-up delay-100">
                 {/* WhatsApp */}
@@ -165,11 +187,9 @@
                     </svg>
                 </a>
                 
-                {/* Line (Official Style Fixed) */}
+                {/* Line (Official Style Fixed) - 使用上面定義的 LineIcon */}
                 <a href="https://line.me/R/ti/p/@470qfati?oat_content=qr" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#06C755">
-                        <path d="M21.24 10.75c0-4.83-4.52-8.75-10.04-8.75S1.16 5.92 1.16 10.75c0 3.86 3.09 7.15 7.37 8.24l-1.05 3.32c-.1.32.25.59.55.43l4.78-3.04c.46.03.93.05 1.4.05 5.52 0 10.04-3.92 10.04-8.75z"/>
-                    </svg>
+                    <LineIcon />
                 </a>
                 
                 {/* Instagram */}
@@ -198,7 +218,7 @@
         );
 
         // ToolCard Component
-        // --- 3. 點讚與至頂功能：加入 Pin 按鈕與 Heart 按鈕 ---
+        // ★★★ 修正點 1 & 3：使用自定義的 PinIcon 和 HeartIcon，保證功能可見 ★★★
         const ToolCard = ({ tool, onToggleLike, onTogglePin }) => {
             const catStyle = getCategoryStyle(tool.categoryGroup);
             const CategoryIcon = getCategoryIcon(tool.categoryGroup);
@@ -206,14 +226,13 @@
             return (
                 <div className={`group relative bg-white border ${tool.isPinned ? 'border-[#bef264] ring-1 ring-[#bef264] shadow-[0_0_20px_rgba(190,242,100,0.15)]' : 'border-slate-100'} rounded-3xl p-7 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 flex flex-col h-full animate-fade-in`}>
                     
-                    {/* 至頂按鈕 (Pin Button) */}
+                    {/* 至頂按鈕 (Pin Button) - 使用自定義 PinIcon */}
                     <button 
                         onClick={(e) => { e.stopPropagation(); onTogglePin(tool.id); }}
                         className={`absolute top-5 right-5 z-10 p-2 rounded-full transition-all ${tool.isPinned ? 'text-[#4d7c0f] bg-[#bef264]' : 'text-slate-300 hover:text-[#4d7c0f] hover:bg-[#ecfccb]'}`}
                         title={tool.isPinned ? "取消置頂" : "置頂 Chatbot"}
                     >
-                        {/* 確保 Pin Icon 存在 */}
-                        {Pin && <Pin size={18} fill={tool.isPinned ? "currentColor" : "none"} className={tool.isPinned ? "-rotate-45" : ""} />}
+                        <PinIcon size={18} fill={tool.isPinned ? "currentColor" : "none"} className={tool.isPinned ? "-rotate-45" : ""} />
                     </button>
 
                     <div className="mb-3 pr-10">
@@ -268,16 +287,15 @@
                         <span className="text-xs text-slate-400 font-medium">
                             {tool.targetUser === 'teacher' ? '老師專用' : '學生專用'}
                         </span>
-                        {/* 點讚按鈕 (Like Button) */}
+                        {/* 點讚按鈕 (Like Button) - 使用自定義 HeartIcon */}
                         <button 
                             onClick={() => onToggleLike(tool)}
                             className="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-red-500 transition-colors group/like"
                         >
-                            {/* 確保 Heart Icon 存在 */}
-                            {Heart && <Heart 
+                            <HeartIcon 
                                 size={18} 
-                                className={`transition-transform group-active/like:scale-125 ${tool.liked ? 'fill-red-500 text-red-500' : ''}`} 
-                            />}
+                                className={`transition-transform group-active/like:scale-125 ${tool.liked ? 'text-red-500 fill-red-500' : 'fill-none'}`} 
+                            />
                             <span>{tool.likes}</span>
                         </button>
                     </div>
