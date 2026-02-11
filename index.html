@@ -50,11 +50,11 @@
             </svg>
         );
 
-        // ★★★ 修正後的 LINE Logo (綠底白字) ★★★
+        // ★★★ 修正後的 LINE Logo (更清晰、放大版) ★★★
         const LineIcon = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none">
-                 <path d="M24 10.304c0-5.69-5.373-10.304-12-10.304S0 4.614 0 10.304c0 5.093 4.295 9.344 10.05 10.123.391.085.923.259 1.058.594.12.302.079.766.038 1.066-.062.445-.27 1.765-.295 1.914-.158.917-.74 1.258.324.69 4.39-2.343 8.358-4.908 9.07-5.516a.434.434 0 0 0 .146-.166c3.627-1.928 3.609-5.176 3.609-5.705z" fill="#06C755"/>
-                 <path d="M7.746 13.5h-2.93a.355.355 0 0 1-.354-.354V7.483a.355.355 0 0 1 .354-.354h.875a.355.355 0 0 1 .354.354v4.44h1.701a.355.355 0 0 1 .354.354v.87a.354.354 0 0 1-.354.353zm2.528 0h-.876a.355.355 0 0 1-.354-.354V7.483a.355.355 0 0 1 .354-.354h.876a.355.355 0 0 1 .354.354v5.663a.355.355 0 0 1-.354.354zm4.836-3.832L13.88 7.397a.4.4 0 0 0-.022-.033.52.52 0 0 0-.023-.028.52.52 0 0 0-.026-.024.435.435 0 0 0-.026-.02.435.435 0 0 0-.028-.018.397.397 0 0 0-.029-.014.526.526 0 0 0-.03-.012.39.39 0 0 0-.03-.008.384.384 0 0 0-.032-.007.49.49 0 0 0-.032-.004H12.36a.355.355 0 0 0-.354.354v5.663a.355.355 0 0 0 .354.354h.875a.355.355 0 0 0 .354-.354v-3.7l1.229 2.272a.317.317 0 0 0 .022.032.52.52 0 0 0 .023.028.52.52 0 0 0 .026.024.435.435 0 0 0 .026.02.435.435 0 0 0 .028.018.397.397 0 0 0 .029.014.526.526 0 0 0 .03.012.39.39 0 0 0 .03.008.384.384 0 0 0 .032.007c.01.002.022.003.033.004h1.213a.355.355 0 0 0 .354-.354V7.483a.355.355 0 0 0-.354-.354h-.875a.355.355 0 0 0-.354.354v3.833zm4.492 2.257h-2.93a.355.355 0 0 1-.354-.354V7.483a.355.355 0 0 1 .354-.354h2.93a.355.355 0 0 1 .354.354v.87a.355.355 0 0 1-.354.354h-1.7v1.17h1.7a.355.355 0 0 1 .354.353v.871a.355.355 0 0 1-.354.354h-1.7v1.17h1.7a.355.355 0 0 1 .354.353v.871a.355.355 0 0 1-.354.353z" fill="#fff"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none">
+                 <path d="M21.5 10.2c0-4.8-4.3-8.7-9.5-8.7S2.5 5.4 2.5 10.2c0 4.3 3.8 7.9 8.9 8.6l-2 4.4c0 0-.4 1.2 1.1.7l6.2-4.1c3-.9 4.8-3.3 4.8-6.1z" fill="#06C755"/>
+                 <path d="M9.8 13.5H7.3c-.3 0-.5-.2-.5-.5V7.4c0-.3.2-.5.5-.5.3 0 .5.2.5.5v5.1h2c.3 0 .5.2.5.5 0 .3-.2.5-.5.5zm2.7-3.3V7.4c0-.3.2-.5.5-.5.3 0 .5.2.5.5v5.6c0 .3-.2.5-.5.5-.3 0-.5-.2-.5-.5v-2.8zm4.4-2.8L15 11V7.4c0-.3.2-.5.5-.5.3 0 .5.2.5.5v5.6c0 .3-.2.5-.5.5h-.1c-.1 0-.2 0-.2-.1L13.1 9.4v3.5c0 .3-.2.5-.5.5-.3 0-.5-.2-.5-.5V7.4c0-.3.2-.5.5-.5h.1c.1 0 .2 0 .3.1l2.1 3.9V7.4c0-.3.2-.5.5-.5.3 0 .5.2.5.5zm4.4 5.6h-2.5c-.3 0-.5-.2-.5-.5V7.4c0-.3.2-.5.5-.5h2.5c.3 0 .5.2.5.5s-.2.5-.5.5h-2v2h2c.3 0 .5.2.5.5s-.2.5-.5.5h-2v2.1h2.5c.3 0 .5.2.5.5 0 .2-.2.5-.5.5z" fill="#fff"/>
             </svg>
         );
         
@@ -89,10 +89,7 @@
         const LeafIcon = (props) => <IconBase {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.5 12 13 13 12"></path></IconBase>;
 
         // --- 設定 Configuration ---
-        const SHEET_ID = "1dQ2CZRpp9GM-LUvZWVQiT4M2w5QJ5QaPfayY-XW0VxA"; 
-        const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-        
-        // ★★★ 請在此填入您最新部署的 Google Apps Script 網址 ★★★
+        // ★★★ 請務必確認這裡填入的是您最新「部署」後的 Web App 網址 ★★★
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZQuswrA-SxFqFuGIYGlFGxAeqdgVx72RdGiGH7cYLVypMhF3Fq12GMHZ68P41kf2qEw/exec"; 
 
         const MAJOR_CATEGORIES = [
@@ -106,43 +103,6 @@
         const LEVELS_FORM = ["國小", "國中", "高中"];
 
         // --- 輔助函式 ---
-        const parseCSV = (text) => {
-            const rows = [];
-            let currentRow = [];
-            let currentCell = '';
-            let insideQuotes = false;
-
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i];
-                const nextChar = text[i + 1];
-
-                if (char === '"') {
-                    if (insideQuotes && nextChar === '"') {
-                        currentCell += '"';
-                        i++;
-                    } else {
-                        insideQuotes = !insideQuotes;
-                    }
-                } else if (char === ',' && !insideQuotes) {
-                    currentRow.push(currentCell.trim());
-                    currentCell = '';
-                } else if ((char === '\r' || char === '\n') && !insideQuotes) {
-                    if (char === '\r' && nextChar === '\n') i++;
-                    if (currentCell || currentRow.length > 0) currentRow.push(currentCell.trim());
-                    if (currentRow.length > 0) rows.push(currentRow);
-                    currentRow = [];
-                    currentCell = '';
-                } else {
-                    currentCell += char;
-                }
-            }
-            if (currentCell || currentRow.length > 0) {
-                currentRow.push(currentCell.trim());
-                rows.push(currentRow);
-            }
-            return rows;
-        };
-
         const getCategoryStyle = (categoryName) => {
             const cat = MAJOR_CATEGORIES.find(c => c.name === categoryName) || MAJOR_CATEGORIES.find(c => c.subjects.some(s => categoryName?.includes(s)));
             return cat ? cat.color : "bg-slate-50 text-slate-600 border-slate-200";
@@ -587,40 +547,44 @@
                 }
             }, []);
 
+            // ★★★ 核心修正：改為讀取 GAS JSON API，而非 CSV ★★★
             useEffect(() => {
                 const fetchSheetData = async () => {
                     try {
-                        const response = await fetch(SHEET_CSV_URL, { cache: 'no-cache' });
+                        // 使用 fetch 直接呼叫 Google Apps Script 的 doGet
+                        const response = await fetch(GOOGLE_SCRIPT_URL, { 
+                            method: "GET",
+                        });
+                        
                         if (!response.ok) throw new Error('無法連線到資料庫');
-                        const text = await response.text();
-                        const rows = parseCSV(text);
+                        
+                        // 直接解析 JSON (不再解析 CSV)
+                        const jsonData = await response.json();
                         
                         // 重新讀取一次最新的 localLikes 以防萬一
                         const storedLikes = JSON.parse(localStorage.getItem('edcafe_liked_tools') || '{}');
 
-                        const parsedTools = rows.slice(1).map((row, index) => {
-                            if (row.length < 3) return null;
+                        const parsedTools = jsonData.map((item, index) => {
+                            // 判斷是否為有效資料 (至少要有標題和作者)
+                            if (!item.title && !item.author) return null;
                             
-                            const rawTargetUser = row[3] || 'student';
-                            const targetUser = rawTargetUser.includes('老師') ? 'teacher' : 'student';
-                            
-                            const rawCategory = row[5] || '其他';
+                            const targetUser = (item.targetUser && item.targetUser.includes('老師')) ? 'teacher' : 'student';
+                            const rawCategory = item.category || '其他';
                             const categoryGroup = mapSubjectToGroup(rawCategory);
-                            // CSV 第 10 欄 (index 9) 是點讚數
-                            const likes = parseInt(row[9]) || 0;
-                            const id = row[0] || `auto-${index}`;
+                            const likes = parseInt(item.likes) || 0;
+                            const id = item.id || `auto-${index}`;
 
                             return {
                                 id: id,
-                                author: row[1] || '匿名',
-                                title: row[2] || '未命名 Chatbot',
+                                author: item.author || '匿名',
+                                title: item.title || '未命名 Chatbot',
                                 targetUser: targetUser,
-                                level: row[4] || '全學制',
+                                level: item.level || '全學制',
                                 categoryGroup: categoryGroup,
                                 rawCategory: rawCategory,
-                                description: row[6] || '無描述',
-                                copyUrl: row[7] || '',
-                                externalUrl: row[8] || '',
+                                description: item.description || '無描述',
+                                copyUrl: item.copyUrl || '',
+                                externalUrl: item.externalUrl || '',
                                 likes: likes, 
                                 liked: !!storedLikes[id], // 根據 Local Storage 判斷是否按過讚
                                 isPinned: false
@@ -630,11 +594,12 @@
                         setTools(parsedTools);
                         setIsLoading(false);
                     } catch (err) {
-                        console.error("讀取失敗，使用備用資料", err);
-                        setError("讀取最新資料失敗，目前顯示離線資料");
+                        console.error("讀取失敗", err);
+                        setError("讀取最新資料失敗，請檢查網路連線。");
+                        // 讀取失敗時顯示範例資料
                         setTools([{
                             id: "mock-1",
-                            title: "MathGPT Pro (離線)",
+                            title: "系統範例 (離線)",
                             author: "系統",
                             description: "這是讀取失敗時的範例資料。請檢查您的網路連線。",
                             targetUser: "student",
@@ -678,9 +643,9 @@
                 });
             }, [tools, view, userRole, selectedLevel, selectedCategory]);
 
-            // --- ★★★ 核心修正：點讚邏輯 ★★★ ---
+            // --- 點讚邏輯 ---
             const handleToggleLike = async (tool) => {
-                const isLiking = !tool.liked; // 如果目前沒按讚，這次動作就是按讚 (true)
+                const isLiking = !tool.liked; 
                 const newCount = isLiking ? tool.likes + 1 : Math.max(0, tool.likes - 1);
                 const action = isLiking ? "like" : "unlike";
 
@@ -692,19 +657,19 @@
                     return t;
                 }));
 
-                // 2. 更新 Local Storage (持久化)
+                // 2. 更新 Local Storage
                 const newLocalLikes = { ...localLikes, [tool.id]: isLiking };
                 setLocalLikes(newLocalLikes);
                 localStorage.setItem('edcafe_liked_tools', JSON.stringify(newLocalLikes));
 
-                // 3. 傳送請求到後端 (同步 Google Sheet)
+                // 3. 傳送請求到後端
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: "POST",
                         mode: "no-cors", 
                         body: JSON.stringify({
-                            action: action, // 傳送 "like" 或 "unlike"
-                            title: tool.title, // 為了保險，傳送標題和作者做匹配
+                            action: action, 
+                            title: tool.title, 
                             author: tool.author
                         }),
                         headers: {
