@@ -50,10 +50,11 @@
             </svg>
         );
 
-        // Line 官方綠色 Logo
+        // ★★★ 修正後的 LINE Logo (綠底白字) ★★★
         const LineIcon = () => (
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#06C755">
-                <path d="M21.24 10.75c0-4.83-4.52-8.75-10.04-8.75S1.16 5.92 1.16 10.75c0 3.86 3.09 7.15 7.37 8.24l-1.05 3.32c-.1.32.25.59.55.43l4.78-3.04c.46.03.93.05 1.4.05 5.52 0 10.04-3.92 10.04-8.75z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none">
+                 <path d="M24 10.304c0-5.69-5.373-10.304-12-10.304S0 4.614 0 10.304c0 5.093 4.295 9.344 10.05 10.123.391.085.923.259 1.058.594.12.302.079.766.038 1.066-.062.445-.27 1.765-.295 1.914-.158.917-.74 1.258.324.69 4.39-2.343 8.358-4.908 9.07-5.516a.434.434 0 0 0 .146-.166c3.627-1.928 3.609-5.176 3.609-5.705z" fill="#06C755"/>
+                 <path d="M7.746 13.5h-2.93a.355.355 0 0 1-.354-.354V7.483a.355.355 0 0 1 .354-.354h.875a.355.355 0 0 1 .354.354v4.44h1.701a.355.355 0 0 1 .354.354v.87a.354.354 0 0 1-.354.353zm2.528 0h-.876a.355.355 0 0 1-.354-.354V7.483a.355.355 0 0 1 .354-.354h.876a.355.355 0 0 1 .354.354v5.663a.355.355 0 0 1-.354.354zm4.836-3.832L13.88 7.397a.4.4 0 0 0-.022-.033.52.52 0 0 0-.023-.028.52.52 0 0 0-.026-.024.435.435 0 0 0-.026-.02.435.435 0 0 0-.028-.018.397.397 0 0 0-.029-.014.526.526 0 0 0-.03-.012.39.39 0 0 0-.03-.008.384.384 0 0 0-.032-.007.49.49 0 0 0-.032-.004H12.36a.355.355 0 0 0-.354.354v5.663a.355.355 0 0 0 .354.354h.875a.355.355 0 0 0 .354-.354v-3.7l1.229 2.272a.317.317 0 0 0 .022.032.52.52 0 0 0 .023.028.52.52 0 0 0 .026.024.435.435 0 0 0 .026.02.435.435 0 0 0 .028.018.397.397 0 0 0 .029.014.526.526 0 0 0 .03.012.39.39 0 0 0 .03.008.384.384 0 0 0 .032.007c.01.002.022.003.033.004h1.213a.355.355 0 0 0 .354-.354V7.483a.355.355 0 0 0-.354-.354h-.875a.355.355 0 0 0-.354.354v3.833zm4.492 2.257h-2.93a.355.355 0 0 1-.354-.354V7.483a.355.355 0 0 1 .354-.354h2.93a.355.355 0 0 1 .354.354v.87a.355.355 0 0 1-.354.354h-1.7v1.17h1.7a.355.355 0 0 1 .354.353v.871a.355.355 0 0 1-.354.354h-1.7v1.17h1.7a.355.355 0 0 1 .354.353v.871a.355.355 0 0 1-.354.353z" fill="#fff"/>
             </svg>
         );
         
@@ -91,7 +92,7 @@
         const SHEET_ID = "1dQ2CZRpp9GM-LUvZWVQiT4M2w5QJ5QaPfayY-XW0VxA"; 
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
         
-        // ★★★ 請務必確認這裡填入的是您最新「部署」後的 Web App 網址 ★★★
+        // ★★★ 請在此填入您最新部署的 Google Apps Script 網址 ★★★
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZQuswrA-SxFqFuGIYGlFGxAeqdgVx72RdGiGH7cYLVypMhF3Fq12GMHZ68P41kf2qEw/exec"; 
 
         const MAJOR_CATEGORIES = [
@@ -346,13 +347,13 @@
                 const payload = {
                     action: "submit", // 標記為投稿
                     teacherName: formData.name,            
-                    chatbotName: formData.chatbotName,     
+                    chatbotName: formData.chatbotName,      
                     targetUser: targetUser === 'teacher' ? '老師使用' : '學生使用', 
                     level: targetUser === 'teacher' ? '全學制' : formData.level, 
                     subject: targetUser === 'teacher' ? '不分科' : formData.subject, 
-                    description: formData.description,     
-                    copyLink: formData.link,               
-                    email: formData.email                  
+                    description: formData.description,      
+                    copyLink: formData.link,                
+                    email: formData.email                   
                 };
 
                 try {
@@ -712,7 +713,6 @@
                     });
                 } catch (e) {
                     console.error("點讚狀態同步失敗", e);
-                    // 這裡可以選擇是否要 rollback UI，但為了體驗通常先保持樂觀更新
                 }
             };
 
