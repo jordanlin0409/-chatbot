@@ -43,8 +43,11 @@
         const { useState, useEffect, useMemo } = React;
 
         // --- 設定 Configuration ---
-        // ★★★ 請務必確認這裡填入的是您最新「部署」後的 Web App 網址 ★★★
+        // ★★★ 原本的網址，用來「讀取」公開資料與「按讚」 ★★★
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRniJWihCmX7PPL1zy4x--qnLicEKamqy3QFv9pch_6aDfXem4fFyYXSccxgmBdIC5/exec"; 
+        
+        // ★★★ 新增：專門用來「接收投稿」的網址 (請換成新審核試算表部署出來的 exec 網址) ★★★
+        const SUBMIT_SCRIPT_URL = "請在此填入審核用試算表的部署網址";
 
         const LEVELS_FORM = ["國小", "國中", "高中"];
 
@@ -304,8 +307,8 @@
             const handleSubmit = async (e) => {
                 e.preventDefault();
                 
-                if (GOOGLE_SCRIPT_URL.includes("請在此填入")) {
-                    alert("請先在程式碼中設定 Google Apps Script 的網址！");
+                if (SUBMIT_SCRIPT_URL.includes("請在此填入")) {
+                    alert("請先在程式碼中設定投稿專用的 Google Apps Script 網址！");
                     return;
                 }
 
@@ -324,7 +327,8 @@
                 };
 
                 try {
-                    await fetch(GOOGLE_SCRIPT_URL, {
+                    // ★★★ 這裡改成發送到 SUBMIT_SCRIPT_URL ★★★
+                    await fetch(SUBMIT_SCRIPT_URL, {
                         method: "POST",
                         body: JSON.stringify(payload),
                         mode: "no-cors", 
