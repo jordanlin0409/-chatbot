@@ -353,8 +353,9 @@
             if (!isOpen) return null;
 
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in overflow-y-auto">
-                    <div className="bg-white border border-slate-100 rounded-[2rem] w-full max-w-2xl p-8 shadow-2xl relative my-8">
+                <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-md animate-fade-in">
+                    <div className="min-h-full flex items-start justify-center p-4 py-8">
+                    <div className="bg-white border border-slate-100 rounded-[2rem] w-full max-w-2xl p-8 shadow-2xl relative">
                         <button onClick={onClose} className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-900 transition-colors">
                             <XIcon size={24} />
                         </button>
@@ -532,6 +533,7 @@
                             </div>
                         </form>
                     </div>
+                </div>
                 </div>
             );
         };
